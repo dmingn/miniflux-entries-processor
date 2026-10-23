@@ -8,9 +8,12 @@ import logzero
 import typer
 from logzero import logger
 
-from feedly_entries_processor.config_loader import Config, load_config
-from feedly_entries_processor.exceptions import ConfigError, FeedlyEntriesProcessorError
-from feedly_entries_processor.process import process
+from miniflux_entries_processor.config_loader import Config, load_config
+from miniflux_entries_processor.exceptions import (
+    ConfigError,
+    FeedlyEntriesProcessorError,
+)
+from miniflux_entries_processor.process import process
 
 app = typer.Typer()
 
@@ -57,7 +60,7 @@ def main(
         ),
     ] = False,
 ) -> None:
-    """A CLI application to process Feedly entries."""  # noqa: D401
+    """A CLI application to process Miniflux entries."""  # noqa: D401
     if json_log:
         logzero.json()
 
@@ -74,7 +77,7 @@ def main(
     try:
         process(config_files=config_files)
     except FeedlyEntriesProcessorError:
-        logger.exception("An error occurred during Feedly entries processing.")
+        logger.exception("An error occurred during Miniflux entries processing.")
         raise typer.Exit(code=1) from None
 
 

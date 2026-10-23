@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from feedly_entries_processor.exceptions import TodoistApiError
-from feedly_entries_processor.todoist_client import add_task_with_retry
+from miniflux_entries_processor.exceptions import TodoistApiError
+from miniflux_entries_processor.todoist_client import add_task_with_retry
 from tests.helpers import make_http_error
 
 

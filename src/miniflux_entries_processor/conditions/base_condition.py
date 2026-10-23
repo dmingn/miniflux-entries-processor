@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, ConfigDict
 
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.feedly_client import Entry
 
 
 class BaseCondition(ABC, BaseModel):

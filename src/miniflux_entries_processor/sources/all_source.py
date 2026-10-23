@@ -3,8 +3,8 @@
 from collections.abc import Generator
 from typing import Literal
 
-from feedly_entries_processor.feedly_client import Entry, FeedlyClient
-from feedly_entries_processor.sources.base_source import BaseStreamSource
+from miniflux_entries_processor.feedly_client import Entry, FeedlyClient
+from miniflux_entries_processor.sources.base_source import BaseStreamSource
 
 
 class AllSource(BaseStreamSource):

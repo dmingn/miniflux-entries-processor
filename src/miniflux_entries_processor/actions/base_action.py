@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
-from feedly_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
+from miniflux_entries_processor.feedly_client import Entry
 
 
 class BaseAction(ABC, BaseModel):

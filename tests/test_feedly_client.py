@@ -9,12 +9,12 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 from requests.exceptions import RequestException
 
-from feedly_entries_processor.exceptions import (
+from miniflux_entries_processor.exceptions import (
     FeedlyClientInitError,
     FeedlyEntriesProcessorError,
     FetchEntriesError,
 )
-from feedly_entries_processor.feedly_client import (
+from miniflux_entries_processor.feedly_client import (
     Entry,
     FeedlyClient,
     Origin,

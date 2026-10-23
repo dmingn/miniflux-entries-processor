@@ -7,8 +7,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from feedly_entries_processor.conditions import RegexPartialMatchCondition
-from feedly_entries_processor.feedly_client import Entry, Summary
+from miniflux_entries_processor.conditions import RegexPartialMatchCondition
+from miniflux_entries_processor.feedly_client import Entry, Summary
 
 
 @pytest.mark.parametrize(

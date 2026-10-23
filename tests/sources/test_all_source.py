@@ -2,8 +2,8 @@
 
 from pytest_mock import MockerFixture
 
-from feedly_entries_processor.feedly_client import FeedlyClient
-from feedly_entries_processor.sources import AllSource
+from miniflux_entries_processor.feedly_client import FeedlyClient
+from miniflux_entries_processor.sources import AllSource
 
 
 def test_AllSource_fetch_entries_calls_client_with_correct_stream_id(

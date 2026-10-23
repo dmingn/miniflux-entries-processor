@@ -6,13 +6,13 @@ from unittest.mock import MagicMock
 import pytest
 from pytest_mock import MockerFixture
 
-from feedly_entries_processor.actions import LogAction
-from feedly_entries_processor.conditions import MatchAllCondition
-from feedly_entries_processor.config_loader import Rule
-from feedly_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from feedly_entries_processor.feedly_client import Entry
-from feedly_entries_processor.process import process_entries, process_entry
-from feedly_entries_processor.sources import SavedSource
+from miniflux_entries_processor.actions import LogAction
+from miniflux_entries_processor.conditions import MatchAllCondition
+from miniflux_entries_processor.config_loader import Rule
+from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
+from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.process import process_entries, process_entry
+from miniflux_entries_processor.sources import SavedSource
 
 
 @pytest.fixture
@@ -93,7 +93,7 @@ def test_process_entry_handles_exception_when_matches_raises(
         "Test exception"
     )
     mock_logger_exception = mocker.patch(
-        "feedly_entries_processor.process.logger.exception"
+        "miniflux_entries_processor.process.logger.exception"
     )
 
     # act
@@ -116,7 +116,7 @@ def test_process_entry_handles_exception_when_action_raises(
         "Test exception"
     )
     mock_logger_exception = mocker.patch(
-        "feedly_entries_processor.process.logger.exception"
+        "miniflux_entries_processor.process.logger.exception"
     )
 
     # act
@@ -140,9 +140,9 @@ def test_process_entry_logs_error_when_action_raises_ActionSkippedDueToPersisten
     ).process.side_effect = ActionSkippedDueToPersistentError(
         "skipped due to persistent error"
     )
-    mock_logger_error = mocker.patch("feedly_entries_processor.process.logger.error")
+    mock_logger_error = mocker.patch("miniflux_entries_processor.process.logger.error")
     mock_logger_exception = mocker.patch(
-        "feedly_entries_processor.process.logger.exception"
+        "miniflux_entries_processor.process.logger.exception"
     )
 
     # act
@@ -160,7 +160,9 @@ def test_process_entries_calls_process_entry_for_each_entry_and_rule(
     mocker: MockerFixture,
 ) -> None:
     # arrange
-    mock_process_entry = mocker.patch("feedly_entries_processor.process.process_entry")
+    mock_process_entry = mocker.patch(
+        "miniflux_entries_processor.process.process_entry"
+    )
     entry1, entry2 = MagicMock(spec=Entry), MagicMock(spec=Entry)
     rule1, rule2 = MagicMock(spec=Rule), MagicMock(spec=Rule)
     entries = [entry1, entry2]

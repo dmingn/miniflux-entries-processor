@@ -8,10 +8,10 @@ import pytest
 from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
-from feedly_entries_processor.actions.remove_from_feedly_tag_action import (
+from miniflux_entries_processor.actions.remove_from_feedly_tag_action import (
     RemoveFromFeedlyTagAction,
 )
-from feedly_entries_processor.feedly_client import Entry, Origin, Summary
+from miniflux_entries_processor.feedly_client import Entry, Origin, Summary
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def mock_feedly_client(mocker: MockerFixture) -> MagicMock:
     mock_client: MagicMock = MagicMock()
     mock_client.user_id = "test_user_123"
     mocker.patch(
-        "feedly_entries_processor.actions.remove_from_feedly_tag_action.create_feedly_client",
+        "miniflux_entries_processor.actions.remove_from_feedly_tag_action.create_feedly_client",
         return_value=mock_client,
     )
     return mock_client
@@ -96,7 +96,7 @@ def test_RemoveFromFeedlyTagAction_uses_create_feedly_client(
 ) -> None:
     # arrange
     create_feedly_client = mocker.patch(
-        "feedly_entries_processor.actions.remove_from_feedly_tag_action.create_feedly_client",
+        "miniflux_entries_processor.actions.remove_from_feedly_tag_action.create_feedly_client",
     )
     monkeypatch.setenv("FEEDLY_TOKEN_DIR", str(tmp_path))
     action = RemoveFromFeedlyTagAction(tag="global.saved")

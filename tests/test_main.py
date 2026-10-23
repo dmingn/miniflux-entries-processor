@@ -7,11 +7,11 @@ from pydantic_yaml import to_yaml_str
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
-from feedly_entries_processor.__main__ import app
-from feedly_entries_processor.actions import LogAction
-from feedly_entries_processor.conditions import MatchAllCondition
-from feedly_entries_processor.config_loader import Config, Rule
-from feedly_entries_processor.sources import SavedSource
+from miniflux_entries_processor.__main__ import app
+from miniflux_entries_processor.actions import LogAction
+from miniflux_entries_processor.conditions import MatchAllCondition
+from miniflux_entries_processor.config_loader import Config, Rule
+from miniflux_entries_processor.sources import SavedSource
 
 runner = CliRunner()
 
@@ -21,7 +21,7 @@ def test_main_runs_process_with_given_config(
     tmp_path: Path,
 ) -> None:
     # arrange
-    mock_process = mocker.patch("feedly_entries_processor.__main__.process")
+    mock_process = mocker.patch("miniflux_entries_processor.__main__.process")
 
     config_file = tmp_path / "config.yml"
     config_file.touch()
@@ -48,7 +48,7 @@ def test_main_validates_config_and_exits_without_processing(
     tmp_path: Path,
 ) -> None:
     # arrange
-    mock_process = mocker.patch("feedly_entries_processor.__main__.process")
+    mock_process = mocker.patch("miniflux_entries_processor.__main__.process")
     config_file = tmp_path / "config.yml"
     config = Config(
         rules=frozenset(
@@ -84,7 +84,7 @@ def test_main_exits_with_error_for_invalid_config_when_validating(
     tmp_path: Path,
 ) -> None:
     # arrange
-    mock_process = mocker.patch("feedly_entries_processor.__main__.process")
+    mock_process = mocker.patch("miniflux_entries_processor.__main__.process")
     config_file = tmp_path / "config.yml"
     # write invalid YAML that will fail validation
     config_file.write_text("not: valid: yaml:", encoding="utf-8")

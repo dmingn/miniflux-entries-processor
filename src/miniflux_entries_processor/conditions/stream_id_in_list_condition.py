@@ -2,8 +2,8 @@
 
 from typing import Literal
 
-from feedly_entries_processor.conditions.base_condition import BaseCondition
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.conditions.base_condition import BaseCondition
+from miniflux_entries_processor.feedly_client import Entry
 
 
 class StreamIdInListCondition(BaseCondition):

@@ -4,8 +4,8 @@ from typing import Literal, assert_never
 
 from logzero import logger
 
-from feedly_entries_processor.actions.base_action import BaseAction
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.actions.base_action import BaseAction
+from miniflux_entries_processor.feedly_client import Entry
 
 
 class LogAction(BaseAction):

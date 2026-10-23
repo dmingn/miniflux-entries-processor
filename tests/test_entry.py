@@ -2,7 +2,7 @@
 
 import pytest
 
-from feedly_entries_processor.feedly_client import Alternate, Entry
+from miniflux_entries_processor.feedly_client import Alternate, Entry
 
 
 @pytest.mark.parametrize(

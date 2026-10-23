@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
-from feedly_entries_processor.actions.base_action import BaseAction
+from miniflux_entries_processor.actions.base_action import BaseAction
 
 if TYPE_CHECKING:
-    from feedly_entries_processor.actions import Action
-    from feedly_entries_processor.feedly_client import Entry
+    from miniflux_entries_processor.actions import Action
+    from miniflux_entries_processor.feedly_client import Entry
 
 
 class RunInSequenceAction(BaseAction):

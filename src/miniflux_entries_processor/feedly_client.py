@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from pydantic.alias_generators import to_camel
 from requests.exceptions import RequestException
 
-from feedly_entries_processor.exceptions import (
+from miniflux_entries_processor.exceptions import (
     FeedlyClientInitError,
     FeedlyEntriesProcessorError,
     FetchEntriesError,

@@ -6,16 +6,16 @@ from typing import TYPE_CHECKING
 
 from logzero import logger
 
-from feedly_entries_processor.config_loader import Rule, load_config
-from feedly_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from feedly_entries_processor.feedly_client import Entry, create_feedly_client
-from feedly_entries_processor.settings import FeedlySettings
+from miniflux_entries_processor.config_loader import Rule, load_config
+from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
+from miniflux_entries_processor.feedly_client import Entry, create_feedly_client
+from miniflux_entries_processor.settings import FeedlySettings
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
 
-    from feedly_entries_processor.sources import StreamSource
+    from miniflux_entries_processor.sources import StreamSource
 
 
 def process_entry(entry: Entry, rule: Rule) -> None:

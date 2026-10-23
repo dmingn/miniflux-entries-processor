@@ -1,7 +1,7 @@
 """Tests for the MatchAllCondition."""
 
-from feedly_entries_processor.conditions import MatchAllCondition
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.conditions import MatchAllCondition
+from miniflux_entries_processor.feedly_client import Entry
 
 
 def test_MatchAllCondition_matches_returns_true_for_entry() -> None:

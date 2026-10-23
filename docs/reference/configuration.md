@@ -1,6 +1,6 @@
 ## Configuration reference
 
-This document describes the YAML configuration format for `feedly-entries-processor`.
+This document describes the YAML configuration format for `miniflux-entries-processor`.
 
 Configuration is written in YAML. Each rule has a `name`, a `source`, a `condition` block, and an `action` block.
 
@@ -43,7 +43,7 @@ For `remove_from_feedly_tag`, set `tag` to `"global.saved"` for the built-in sav
 To view the full JSON schema for the configuration, run:
 
 ```bash
-feedly-entries-processor --show-config-schema
+miniflux-entries-processor --show-config-schema
 ```
 
 ### Example configuration

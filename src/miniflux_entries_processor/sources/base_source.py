@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 from pydantic import BaseModel, ConfigDict
 
-from feedly_entries_processor.feedly_client import Entry, FeedlyClient
+from miniflux_entries_processor.feedly_client import Entry, FeedlyClient
 
 
 class BaseStreamSource(ABC, BaseModel):

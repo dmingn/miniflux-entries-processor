@@ -7,25 +7,25 @@ from pydantic import SecretStr, ValidationError
 from pydantic_yaml import to_yaml_str
 from ruamel.yaml.error import YAMLError
 
-from feedly_entries_processor.actions import (
+from miniflux_entries_processor.actions import (
     AddTodoistTaskAction,
     LogAction,
     RunInSequenceAction,
 )
-from feedly_entries_processor.conditions import (
+from miniflux_entries_processor.conditions import (
     MatchAllCondition,
     RegexPartialMatchCondition,
     StreamIdInListCondition,
 )
-from feedly_entries_processor.config_loader import (
+from miniflux_entries_processor.config_loader import (
     Config,
     Rule,
     load_config,
     load_config_file,
 )
-from feedly_entries_processor.exceptions import ConfigError
-from feedly_entries_processor.settings import TodoistSettings
-from feedly_entries_processor.sources import AllSource, SavedSource
+from miniflux_entries_processor.exceptions import ConfigError
+from miniflux_entries_processor.settings import TodoistSettings
+from miniflux_entries_processor.sources import AllSource, SavedSource
 
 TEST_CONFIGS_PATH = Path(__file__).parent / "test_configs"
 _TODOIST_TEST_TOKEN = "todoist_test_token"  # noqa: S105
