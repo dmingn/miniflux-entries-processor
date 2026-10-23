@@ -1,6 +1,6 @@
 ## How to run the CLI and configure rules
 
-This guide shows different ways to run `feedly-entries-processor` and how to structure your YAML configuration.
+This guide shows different ways to run `miniflux-entries-processor` and how to structure your YAML configuration.
 
 For details of the YAML schema itself, see the configuration reference in [`configuration.md`](../reference/configuration.md).
 
@@ -11,7 +11,7 @@ For details of the YAML schema itself, see the configuration reference in [`conf
 Run the processor with a single YAML configuration file:
 
 ```bash
-feedly-entries-processor config.yaml
+miniflux-entries-processor config.yaml
 ```
 
 ### Multiple files and directories
@@ -19,7 +19,7 @@ feedly-entries-processor config.yaml
 You can pass multiple files and/or directories. Rules are merged:
 
 ```bash
-feedly-entries-processor config1.yaml config2.yaml ./rules/
+miniflux-entries-processor config1.yaml config2.yaml ./rules/
 ```
 
 ### Custom token directory
@@ -35,7 +35,7 @@ When using the `add_todoist_task` action, set the `TODOIST_API_TOKEN` environmen
 To emit JSON-formatted logs, use `--json-log`:
 
 ```bash
-feedly-entries-processor --json-log config.yaml
+miniflux-entries-processor --json-log config.yaml
 ```
 
 ### Validate configuration
@@ -43,7 +43,7 @@ feedly-entries-processor --json-log config.yaml
 To validate configuration files without contacting Feedly, use `--validate-config`:
 
 ```bash
-feedly-entries-processor --validate-config config.yaml
+miniflux-entries-processor --validate-config config.yaml
 ```
 
 ### Show configuration schema
@@ -51,7 +51,7 @@ feedly-entries-processor --validate-config config.yaml
 To view the full JSON schema for the configuration, run:
 
 ```bash
-feedly-entries-processor --show-config-schema
+miniflux-entries-processor --show-config-schema
 ```
 
 ## Basic configuration structure

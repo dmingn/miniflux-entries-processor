@@ -6,11 +6,11 @@ from logzero import logger
 from pydantic import Field
 from todoist_api_python.api import TodoistAPI
 
-from feedly_entries_processor.actions.base_action import BaseAction
-from feedly_entries_processor.exceptions import TodoistApiError
-from feedly_entries_processor.feedly_client import Entry
-from feedly_entries_processor.settings import TodoistSettings
-from feedly_entries_processor.todoist_client import add_task_with_retry
+from miniflux_entries_processor.actions.base_action import BaseAction
+from miniflux_entries_processor.exceptions import TodoistApiError
+from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.settings import TodoistSettings
+from miniflux_entries_processor.todoist_client import add_task_with_retry
 
 
 class AddTodoistTaskAction(BaseAction):

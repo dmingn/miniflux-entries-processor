@@ -1,7 +1,7 @@
 [project]
-name = "feedly-entries-processor"
+name = "miniflux-entries-processor"
 dynamic = ["version"]
-description = ""
+description = "A Python CLI tool that fetches entries from Miniflux and processes them based on rules defined in YAML."
 authors = [
     { name = "dmingn", email = "dmingn@users.noreply.github.com" }
 ]
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-feedly-entries-processor = "feedly_entries_processor.__main__:app"
+miniflux-entries-processor = "miniflux_entries_processor.__main__:app"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

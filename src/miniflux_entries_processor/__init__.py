@@ -1,0 +1,1 @@
+"""Miniflux entries processor."""

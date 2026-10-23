@@ -7,7 +7,7 @@ from tenacity import wait_fixed
 @pytest.fixture(autouse=True)
 def patch_todoist_retry_no_wait(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch Todoist retry to wait=0 via tenacity ``retry_with`` so tests do not sleep."""
-    from feedly_entries_processor.todoist_client import (  # noqa: PLC0415
+    from miniflux_entries_processor.todoist_client import (  # noqa: PLC0415
         _add_task_with_retry_impl,
     )
 
@@ -15,6 +15,6 @@ def patch_todoist_retry_no_wait(monkeypatch: pytest.MonkeyPatch) -> None:
         wait=wait_fixed(0),
     )
     monkeypatch.setattr(
-        "feedly_entries_processor.todoist_client._add_task_with_retry_impl",
+        "miniflux_entries_processor.todoist_client._add_task_with_retry_impl",
         no_wait_impl,
     )

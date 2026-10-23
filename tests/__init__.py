@@ -1,1 +1,1 @@
-"""Tests for feedly-entries-processor."""
+"""Tests for miniflux-entries-processor."""

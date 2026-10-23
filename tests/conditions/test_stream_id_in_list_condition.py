@@ -7,8 +7,8 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from feedly_entries_processor.conditions import StreamIdInListCondition
-from feedly_entries_processor.feedly_client import Entry, Origin
+from miniflux_entries_processor.conditions import StreamIdInListCondition
+from miniflux_entries_processor.feedly_client import Entry, Origin
 
 
 @pytest.mark.parametrize(

@@ -1,6 +1,6 @@
-# feedly-entries-processor
+# miniflux-entries-processor
 
-A Python CLI tool that fetches entries from Feedly (saved entries or the All feed) and processes them based on rules defined in YAML. You combine conditions and actions to route articles to actions such as logging or adding tasks to Todoist.
+A Python CLI tool that fetches entries from Miniflux and processes them based on rules defined in YAML. You combine conditions and actions to route articles to actions such as logging or adding tasks to Todoist.
 
 ## Getting started
 

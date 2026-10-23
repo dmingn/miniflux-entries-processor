@@ -6,8 +6,8 @@ from typing import Literal, assert_never
 
 from pydantic import Field, field_validator
 
-from feedly_entries_processor.conditions.base_condition import BaseCondition
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.conditions.base_condition import BaseCondition
+from miniflux_entries_processor.feedly_client import Entry
 
 FieldName = Literal["title", "author", "summary_contents"]
 

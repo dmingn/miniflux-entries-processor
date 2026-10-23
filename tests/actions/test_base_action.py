@@ -3,9 +3,9 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from feedly_entries_processor.actions.base_action import BaseAction
-from feedly_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from feedly_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.actions.base_action import BaseAction
+from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
+from miniflux_entries_processor.feedly_client import Entry
 
 
 class ConcreteAction(BaseAction):

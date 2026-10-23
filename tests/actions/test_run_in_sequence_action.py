@@ -6,8 +6,8 @@ import pytest
 from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
-from feedly_entries_processor.actions import LogAction, RunInSequenceAction
-from feedly_entries_processor.feedly_client import Entry, Origin, Summary
+from miniflux_entries_processor.actions import LogAction, RunInSequenceAction
+from miniflux_entries_processor.feedly_client import Entry, Origin, Summary
 
 
 @pytest.fixture

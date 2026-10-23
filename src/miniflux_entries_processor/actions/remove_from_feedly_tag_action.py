@@ -7,13 +7,13 @@ from logzero import logger
 from pydantic import Field
 from pydantic.types import StringConstraints
 
-from feedly_entries_processor.actions.base_action import BaseAction
-from feedly_entries_processor.feedly_client import (
+from miniflux_entries_processor.actions.base_action import BaseAction
+from miniflux_entries_processor.feedly_client import (
     Entry,
     FeedlyClient,
     create_feedly_client,
 )
-from feedly_entries_processor.settings import FeedlySettings
+from miniflux_entries_processor.settings import FeedlySettings
 
 
 class RemoveFromFeedlyTagAction(BaseAction):

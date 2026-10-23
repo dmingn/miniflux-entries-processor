@@ -1,6 +1,6 @@
 ## Getting started
 
-This tutorial guides you through running `feedly-entries-processor` for the first time using a simple configuration.
+This tutorial guides you through running `miniflux-entries-processor` for the first time using a simple configuration.
 
 You will:
 
@@ -23,7 +23,7 @@ Before you start, ensure that you have:
 Install from the repository using `pipx`:
 
 ```bash
-pipx install git+https://github.com/dmingn/feedly-entries-processor/
+pipx install git+https://github.com/dmingn/miniflux-entries-processor/
 ```
 
 ### 3. Configure Feedly authentication
@@ -61,7 +61,7 @@ For more configuration options (such as Todoist integration), see [`configuratio
 Run the CLI against your configuration file:
 
 ```bash
-feedly-entries-processor config.yaml
+miniflux-entries-processor config.yaml
 ```
 
 If everything is set up correctly, entries from the configured feed will be processed and logged.

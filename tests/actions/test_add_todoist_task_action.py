@@ -10,22 +10,22 @@ from pytest_mock import MockerFixture
 from requests import Response
 from requests.exceptions import HTTPError
 
-from feedly_entries_processor.actions.add_todoist_task_action import (
+from miniflux_entries_processor.actions.add_todoist_task_action import (
     AddTodoistTaskAction,
 )
-from feedly_entries_processor.exceptions import (
+from miniflux_entries_processor.exceptions import (
     ActionSkippedDueToPersistentError,
     TodoistApiError,
 )
-from feedly_entries_processor.feedly_client import Alternate, Entry, Origin, Summary
-from feedly_entries_processor.settings import TodoistSettings
+from miniflux_entries_processor.feedly_client import Alternate, Entry, Origin, Summary
+from miniflux_entries_processor.settings import TodoistSettings
 
 
 @pytest.fixture
 def mock_todoist_api(mocker: MockerFixture) -> MagicMock:
     """Fixture for mocking TodoistAPI."""
     mock_api: MagicMock = mocker.patch(
-        "feedly_entries_processor.actions.add_todoist_task_action.TodoistAPI"
+        "miniflux_entries_processor.actions.add_todoist_task_action.TodoistAPI"
     )
     return mock_api
 

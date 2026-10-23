@@ -8,7 +8,7 @@ from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponen
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Task
 
-from feedly_entries_processor.exceptions import TodoistApiError
+from miniflux_entries_processor.exceptions import TodoistApiError
 
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
