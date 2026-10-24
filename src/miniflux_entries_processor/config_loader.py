@@ -34,23 +34,24 @@ class Rule(BaseModel):
 class Config(BaseModel):
     """Overall configuration for the Miniflux Entries Processor."""
 
-    rules: frozenset[Rule]
+    rules: tuple[Rule, ...] = ()
     model_config = ConfigDict(frozen=True)
 
     def __or__(self, other: "Config") -> "Config":
-        """Combine two Config objects, merging their rules.
+        """Combine two Config objects, appending rules in order.
 
         Args:
             other: Another Config object to combine with.
 
         Returns
         -------
-            A new Config object containing all unique rules from both original Config objects.
+            A new Config object containing rules from both operands in order
+            (left then right).
         """
         if not isinstance(other, Config):
             return NotImplemented
 
-        return Config(rules=self.rules | other.rules)
+        return Config(rules=(*self.rules, *other.rules))
 
 
 def load_config_file(file_path: Path) -> Config:
@@ -87,13 +88,15 @@ def load_config(paths: Iterable[Path]) -> Config:
     Returns
     -------
         A Config object representing the merged configuration from all valid files.
+        Rules are kept in the order of path arguments, and within a directory in
+        filename order.
 
     Raises
     ------
         ConfigError: If there is an error in loading or validating any of the
                      configuration files.
     """
-    config = Config(rules=frozenset())
+    config = Config()
 
     validated_path: TypeAdapter[FilePath | DirectoryPath] = TypeAdapter(
         FilePath | DirectoryPath
@@ -104,12 +107,17 @@ def load_config(paths: Iterable[Path]) -> Config:
             if path.is_file():
                 config |= load_config_file(path)
             elif path.is_dir():
-                for file_path in path.iterdir():
-                    if file_path.is_file() and file_path.suffix.lower() in {
-                        ".yml",
-                        ".yaml",
-                    }:
-                        config |= load_config_file(file_path)
+                yaml_files = sorted(
+                    (
+                        file_path
+                        for file_path in path.iterdir()
+                        if file_path.is_file()
+                        and file_path.suffix.lower() in {".yml", ".yaml"}
+                    ),
+                    key=lambda file_path: file_path.name,
+                )
+                for file_path in yaml_files:
+                    config |= load_config_file(file_path)
     except ValidationError as e:
         msg = f"Invalid path found in configuration paths: '{path}'."
         raise ConfigError(msg) from e
