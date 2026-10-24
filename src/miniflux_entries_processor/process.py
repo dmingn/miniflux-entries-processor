@@ -54,9 +54,9 @@ def process(config_files: list[Path]) -> None:
 
     client = create_miniflux_client()
 
-    rules_by_source: dict[Source, set[Rule]] = {}
+    rules_by_source: dict[Source, list[Rule]] = {}
     for rule in config.rules:
-        rules_by_source.setdefault(rule.source, set()).add(rule)
+        rules_by_source.setdefault(rule.source, []).append(rule)
 
     for source, rules in rules_by_source.items():
         process_entries(entries=source.fetch_entries(client), rules=rules)

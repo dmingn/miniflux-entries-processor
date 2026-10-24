@@ -10,7 +10,7 @@ miniflux-entries-processor config.yaml
 
 ### Run with multiple files or directories
 
-You can pass multiple YAML files and directories. Rules from all sources are merged:
+You can pass multiple YAML files and directories. Rules from all sources are merged in argument order. Within a directory, YAML files are loaded in filename order:
 
 ```bash
 miniflux-entries-processor config1.yaml config2.yaml ./rules/

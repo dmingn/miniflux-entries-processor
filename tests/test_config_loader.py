@@ -148,14 +148,14 @@ def test_load_config_raises_ConfigError_for_invalid_path(
     "config",
     [
         pytest.param(
-            Config(rules=frozenset([Rule(name=name, source=s, condition=c, action=a)])),
+            Config(rules=(Rule(name=name, source=s, condition=c, action=a),)),
             id=name,
         )
-        for (s, c, a) in frozenset(
-            [(s, _DEFAULT_CONDITION, _DEFAULT_ACTION) for s in _SOURCES]
-            + [(_DEFAULT_SOURCE, c, _DEFAULT_ACTION) for c in _CONDITIONS]
-            + [(_DEFAULT_SOURCE, _DEFAULT_CONDITION, a) for a in _ACTIONS]
-        )
+        for (s, c, a) in [
+            *[(s, _DEFAULT_CONDITION, _DEFAULT_ACTION) for s in _SOURCES],
+            *[(_DEFAULT_SOURCE, c, _DEFAULT_ACTION) for c in _CONDITIONS],
+            *[(_DEFAULT_SOURCE, _DEFAULT_CONDITION, a) for a in _ACTIONS],
+        ]
         for name in [f"{type(s).__name__}_{type(c).__name__}_{type(a).__name__}"]
     ],
 )
@@ -174,7 +174,7 @@ def test_Config_can_be_written_to_and_loaded_from_yaml(
     assert loaded == config
 
 
-def test_Config_or_operator_merges_rules_and_preserves_operands() -> None:
+def test_Config_or_operator_merges_rules_in_order_and_preserves_operands() -> None:
     # arrange
     rule1 = Rule(
         name="Rule 1",
@@ -191,98 +191,101 @@ def test_Config_or_operator_merges_rules_and_preserves_operands() -> None:
         ),
         action=LogAction(name="log", level="debug"),
     )
-    common_rule = Rule(
-        name="Common Rule",
+    rule3 = Rule(
+        name="Rule 3",
         source=StarredSource(),
         condition=MatchAllCondition(name="match_all"),
         action=LogAction(name="log", level="warning"),
     )
 
-    config1 = Config(rules=frozenset([rule1]))
-    config2 = Config(rules=frozenset([rule2]))
-    config1_with_common = Config(rules=frozenset([rule1, common_rule]))
-    config2_with_common = Config(rules=frozenset([rule2, common_rule]))
+    config1 = Config(rules=(rule1,))
+    config2 = Config(rules=(rule2, rule3))
 
     # act
     combined_config = config1 | config2
-    combined_config_with_common = config1_with_common | config2_with_common
 
     # assert
-    assert combined_config.rules == frozenset([rule1, rule2])
-    assert combined_config_with_common.rules == frozenset([rule1, rule2, common_rule])
-    assert config1.rules == frozenset([rule1])
-    assert config2.rules == frozenset([rule2])
+    assert combined_config.rules == (rule1, rule2, rule3)
+    assert config1.rules == (rule1,)
+    assert config2.rules == (rule2, rule3)
     with pytest.raises(TypeError):
         config1 | "not a config"  # type: ignore[operator]
 
 
-def test_load_config_merges_yaml_and_yml_from_directory(
-    tmp_path: Path,
-) -> None:
+def test_load_config_file_preserves_rule_order_within_file(tmp_path: Path) -> None:
+    # arrange
+    rule_a = Rule(
+        name="A",
+        source=UnreadSource(),
+        condition=MatchAllCondition(),
+        action=LogAction(),
+    )
+    rule_b = Rule(
+        name="B",
+        source=UnreadSource(),
+        condition=MatchAllCondition(),
+        action=LogAction(level="debug"),
+    )
+    path = tmp_path / "config.yaml"
+    _save_config(Config(rules=(rule_a, rule_b)), path)
+
+    # act
+    loaded = load_config_file(path)
+
+    # assert
+    assert loaded.rules == (rule_a, rule_b)
+
+
+def test_load_config_loads_directory_files_in_filename_order(tmp_path: Path) -> None:
     # arrange
     config_dir = tmp_path / "configs"
     config_dir.mkdir()
 
-    yaml_config_path = config_dir / "config1.yaml"
-    yaml_rule = Rule(
-        name="Yaml Rule",
+    later_rule = Rule(
+        name="Later",
         source=StarredSource(),
-        condition=MatchAllCondition(name="match_all"),
-        action=LogAction(name="log", level="info"),
+        condition=MatchAllCondition(),
+        action=LogAction(),
     )
-    _save_config(Config(rules=frozenset([yaml_rule])), yaml_config_path)
-
-    yml_config_path = config_dir / "config2.yml"
-    yml_rule = Rule(
-        name="Yml Rule",
+    earlier_rule = Rule(
+        name="Earlier",
         source=StarredSource(),
-        condition=FeedIdInListCondition(
-            name="feed_id_in_list",
-            feed_ids=frozenset({99}),
-        ),
-        action=LogAction(name="log", level="debug"),
+        condition=MatchAllCondition(),
+        action=LogAction(level="debug"),
     )
-    _save_config(Config(rules=frozenset([yml_rule])), yml_config_path)
-
-    (config_dir / "invalid.txt").write_text("not a yaml", encoding="utf-8")
+    _save_config(Config(rules=(later_rule,)), config_dir / "b.yaml")
+    _save_config(Config(rules=(earlier_rule,)), config_dir / "a.yml")
+    (config_dir / "ignored.txt").write_text("not a yaml", encoding="utf-8")
 
     # act
-    loaded_config = load_config([config_dir])
+    loaded = load_config([config_dir])
 
     # assert
-    assert loaded_config.rules == frozenset([yaml_rule, yml_rule])
+    assert loaded.rules == (earlier_rule, later_rule)
 
 
-def test_load_config_merges_rules_from_mixed_file_and_directory_paths(
-    tmp_path: Path,
-) -> None:
+def test_load_config_merges_paths_in_argument_order(tmp_path: Path) -> None:
     # arrange
     config_dir = tmp_path / "configs"
     config_dir.mkdir()
-
-    dir_yaml_path = config_dir / "dir_config.yaml"
-    dir_yaml_rule = Rule(
-        name="Dir Yaml Rule",
+    dir_rule = Rule(
+        name="From Dir",
         source=StarredSource(),
-        condition=MatchAllCondition(name="match_all"),
-        action=LogAction(name="log", level="info"),
+        condition=MatchAllCondition(),
+        action=LogAction(),
     )
-    _save_config(Config(rules=frozenset([dir_yaml_rule])), dir_yaml_path)
-
-    standalone_yml_path = tmp_path / "standalone_config.yml"
-    standalone_yml_rule = Rule(
-        name="Standalone Yml Rule",
-        source=StarredSource(),
-        condition=FeedIdInListCondition(
-            name="feed_id_in_list",
-            feed_ids=frozenset({100}),
-        ),
-        action=LogAction(name="log", level="debug"),
+    file_rule = Rule(
+        name="From File",
+        source=UnreadSource(),
+        condition=MatchAllCondition(),
+        action=LogAction(level="debug"),
     )
-    _save_config(Config(rules=frozenset([standalone_yml_rule])), standalone_yml_path)
+    _save_config(Config(rules=(dir_rule,)), config_dir / "dir.yaml")
+    file_path = tmp_path / "standalone.yml"
+    _save_config(Config(rules=(file_rule,)), file_path)
 
     # act
-    loaded_config = load_config([config_dir, standalone_yml_path])
+    loaded = load_config([config_dir, file_path])
 
     # assert
-    assert loaded_config.rules == frozenset([dir_yaml_rule, standalone_yml_rule])
+    assert loaded.rules == (dir_rule, file_rule)
