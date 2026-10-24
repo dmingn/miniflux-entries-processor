@@ -71,3 +71,8 @@ ignore = ["COM812", "E501"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
+
+[tool.pytest.ini_options]
+markers = [
+    "miniflux_integration: Miniflux integration tests that require Docker Compose",
+]

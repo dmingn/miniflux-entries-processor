@@ -24,7 +24,23 @@ To ensure code quality and adherence to standards, run:
 make format-and-check
 ```
 
-This command runs formatting, linting, type checking, and unit tests.
+This command runs formatting, linting, type checking, and unit tests. Miniflux integration tests are excluded from this target.
+
+### Miniflux integration tests
+
+These tests start Miniflux, Postgres, and an nginx RSS fixture with Docker Compose, then exercise `process()` against the real Miniflux API. They do not go through the CLI entrypoint.
+
+Requirements:
+
+- Docker with Compose support
+
+Run them with:
+
+```bash
+make miniflux-integration
+```
+
+Docker is required. If Docker is unavailable, these tests fail.
 
 ## Testing conventions
 
