@@ -10,6 +10,7 @@ from ruamel.yaml.error import YAMLError
 from miniflux_entries_processor.actions import (
     AddTodoistTaskAction,
     LogAction,
+    MarkAsReadAction,
     RunInSequenceAction,
     StarAction,
     UnstarAction,
@@ -70,6 +71,7 @@ _ACTIONS = (
     ),
     UnstarAction(),
     StarAction(),
+    MarkAsReadAction(),
     RunInSequenceAction(actions=(LogAction(),)),
 )
 

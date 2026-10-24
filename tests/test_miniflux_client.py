@@ -314,6 +314,35 @@ def test_MinifluxClient_star_entry_skips_toggle_when_already_starred(
     assert mock_session.request.call_count == 1
 
 
+def test_MinifluxClient_mark_entry_as_read_puts_status_read(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    update_response = MagicMock()
+    update_response.status_code = 204
+    update_response.content = b""
+    update_response.raise_for_status.return_value = None
+    mock_session.request.return_value = update_response
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act
+    client.mark_entry_as_read(3)
+
+    # assert
+    mock_session.request.assert_called_once()
+    update_call = mock_session.request.call_args
+    assert update_call.args[0] == "PUT"
+    assert update_call.args[1].endswith("/v1/entries")
+    assert update_call.kwargs["json"] == {
+        "entry_ids": [3],
+        "status": "read",
+    }
+
+
 def test_MinifluxClient_toggle_entry_bookmark_raises_on_request_error(
     mock_session: MagicMock,
 ) -> None:
