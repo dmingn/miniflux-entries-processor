@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>E2E Feed</title>
+    <link>http://example.com/</link>
+    <description>Feed for end-to-end tests</description>
+    <item>
+      <title>E2E Entry</title>
+      <link>http://example.com/e2e-entry</link>
+      <guid>http://example.com/e2e-entry</guid>
+      <description>Body for the e2e entry</description>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
