@@ -2,92 +2,83 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pydantic import ValidationError
 
 from miniflux_entries_processor.conditions import RegexPartialMatchCondition
-from miniflux_entries_processor.feedly_client import Entry, Summary
+from tests.helpers import make_entry
+
+if TYPE_CHECKING:
+    from miniflux_entries_processor.miniflux_client import Entry
 
 
 @pytest.mark.parametrize(
     ("entry", "fields", "patterns", "expected"),
     [
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title"],
             ["Hello"],
             True,
             id="match_title_single_pattern",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title"],
             ["foo", "World"],
             True,
             id="match_title_multiple_patterns",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["author"],
             ["Alice"],
             True,
             id="match_author",
         ),
         pytest.param(
-            Entry(
-                id="1",
-                title="Hello World",
-                author="Alice",
-                summary=Summary(content="This is content"),
-            ),
-            ["summary_contents"],
+            make_entry(title="Hello World", author="Alice", content="This is content"),
+            ["content"],
             ["content"],
             True,
-            id="match_summary_contents",
+            id="match_content",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title", "author"],
             ["Alice"],
             True,
             id="match_multiple_fields",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title"],
             ["(?i)hello"],
             True,
             id="match_case_insensitive_inline_flag",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title"],
             ["^Hello$"],
             False,
             id="no_match_full_match_required_by_regex",
         ),
         pytest.param(
-            Entry(id="1", title="Hello World", author="Alice"),
+            make_entry(title="Hello World", author="Alice"),
             ["title"],
             ["foo"],
             False,
             id="no_match_wrong_pattern",
         ),
         pytest.param(
-            Entry(id="1", title=None, author="Alice"),
-            ["title"],
+            make_entry(title="Hello World", author=None),
+            ["author"],
             ["foo"],
             False,
             id="no_match_field_is_none",
-        ),
-        pytest.param(
-            Entry(id="1", title="Hello World", summary=None),
-            ["summary_contents"],
-            ["foo"],
-            False,
-            id="no_match_summary_is_none",
         ),
     ],
 )
@@ -116,7 +107,7 @@ def test_RegexPartialMatchCondition_can_be_instantiated() -> None:
     condition = RegexPartialMatchCondition.model_validate(
         {
             "name": "regex_partial_match",
-            "fields": ["title", "summary_contents"],
+            "fields": ["title", "content"],
             "patterns": ["p1", "p2"],
         }
     )
@@ -124,7 +115,7 @@ def test_RegexPartialMatchCondition_can_be_instantiated() -> None:
     # assert
     assert isinstance(condition, RegexPartialMatchCondition)
     assert condition.name == "regex_partial_match"
-    assert condition.fields == ("title", "summary_contents")
+    assert condition.fields == ("title", "content")
     assert condition.patterns == ("p1", "p2")
 
 

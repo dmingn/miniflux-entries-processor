@@ -1,12 +1,12 @@
 """Tests for the MatchAllCondition."""
 
 from miniflux_entries_processor.conditions import MatchAllCondition
-from miniflux_entries_processor.feedly_client import Entry
+from tests.helpers import make_entry
 
 
 def test_MatchAllCondition_matches_returns_true_for_entry() -> None:
     # arrange
-    entry = Entry(id="entry1", title="Test", canonical_url="http://example.com")
+    entry = make_entry()
     condition = MatchAllCondition(name="match_all")
 
     # act

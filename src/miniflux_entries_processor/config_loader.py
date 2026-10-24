@@ -18,14 +18,14 @@ from ruamel.yaml.error import YAMLError
 from miniflux_entries_processor.actions import Action
 from miniflux_entries_processor.conditions import Condition
 from miniflux_entries_processor.exceptions import ConfigError
-from miniflux_entries_processor.sources import StreamSource
+from miniflux_entries_processor.sources import Source
 
 
 class Rule(BaseModel):
     """Defines a single processing rule for Miniflux entries."""
 
     name: str
-    source: StreamSource = Field(discriminator="name")
+    source: Source = Field(discriminator="name")
     condition: Condition = Field(discriminator="name")
     action: Action = Field(discriminator="name")
     model_config = ConfigDict(frozen=True)

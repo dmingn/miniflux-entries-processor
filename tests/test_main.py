@@ -11,7 +11,7 @@ from miniflux_entries_processor.__main__ import app
 from miniflux_entries_processor.actions import LogAction
 from miniflux_entries_processor.conditions import MatchAllCondition
 from miniflux_entries_processor.config_loader import Config, Rule
-from miniflux_entries_processor.sources import SavedSource
+from miniflux_entries_processor.sources import StarredSource
 
 runner = CliRunner()
 
@@ -55,7 +55,7 @@ def test_main_validates_config_and_exits_without_processing(
             [
                 Rule(
                     name="Test Rule",
-                    source=SavedSource(),
+                    source=StarredSource(),
                     condition=MatchAllCondition(),
                     action=LogAction(),
                 ),

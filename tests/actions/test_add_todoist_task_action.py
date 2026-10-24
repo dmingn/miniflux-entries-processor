@@ -17,8 +17,9 @@ from miniflux_entries_processor.exceptions import (
     ActionSkippedDueToPersistentError,
     TodoistApiError,
 )
-from miniflux_entries_processor.feedly_client import Alternate, Entry, Origin, Summary
+from miniflux_entries_processor.miniflux_client import Entry
 from miniflux_entries_processor.settings import TodoistSettings
+from tests.helpers import make_entry
 
 
 @pytest.fixture
@@ -59,24 +60,10 @@ def entry_builder() -> Callable[..., Entry]:
 
     def _builder(
         title: str = "Test Entry",
-        canonical_url: str | None = "http://example.com/test",
-        alternate: list[Alternate] | None = None,
-        summary_content: str | None = "Test Summary Content",
+        url: str = "http://example.com/test",
+        content: str = "Test Summary Content",
     ) -> Entry:
-        return Entry(
-            id="test_id",
-            title=title,
-            canonical_url=canonical_url,
-            alternate=alternate,
-            origin=Origin(
-                title="Test Origin",
-                html_url="http://example.com",
-                stream_id="test_stream_id",
-            ),
-            summary=Summary(content=summary_content) if summary_content else None,
-            published=1234567890,
-            author=None,
-        )
+        return make_entry(title=title, url=url, content=content)
 
     return _builder
 
@@ -122,8 +109,8 @@ def test_AddTodoistTaskAction_process_creates_task_with_all_optional_params(
     )
     entry = entry_builder(
         title="Entry with Params",
-        canonical_url="http://example.com/params",
-        summary_content="Summary for params",
+        url="http://example.com/params",
+        content="Summary for params",
     )
     mock_instance = mock_todoist_api.return_value
     mock_instance.add_task.return_value.id = "task_789"
@@ -146,7 +133,7 @@ def test_AddTodoistTaskAction_process_creates_task_with_all_optional_params(
 def test_AddTodoistTaskAction_process_raises_ValueError_when_todoist_api_token_is_not_set(
     entry_builder: Callable[..., Entry],
 ) -> None:
-    # arrange: action with no token
+    # arrange
     action = AddTodoistTaskAction(
         project_id="test_project_id",
         todoist_settings=TodoistSettings.model_construct(todoist_api_token=None),
@@ -165,54 +152,16 @@ def test_AddTodoistTaskAction_process_raises_ValueError_for_entry_without_url(
     add_todoist_task_action_factory: Callable[..., AddTodoistTaskAction],
     entry_builder: Callable[..., Entry],
 ) -> None:
-    # arrange: no canonical_url and no alternate
-    entry = entry_builder(
-        canonical_url=None,
-        alternate=None,
-        title="Test Entry No URL",
-        summary_content=None,
-    )
+    # arrange
+    entry = entry_builder(url="", title="Test Entry No URL", content="")
     action = add_todoist_task_action_factory()
 
     # act & assert
     with pytest.raises(
         ValueError,
-        match=r"Entry must have a URL \(canonical_url or alternate\) to be processed by AddTodoistTaskAction\.",
+        match=r"Entry must have a URL to be processed by AddTodoistTaskAction\.",
     ):
         action.process(entry)
-
-
-def test_AddTodoistTaskAction_process_uses_alternate_when_canonical_url_is_None(
-    mock_todoist_api: MagicMock,
-    add_todoist_task_action_factory: Callable[..., AddTodoistTaskAction],
-    entry_builder: Callable[..., Entry],
-) -> None:
-    # arrange: canonical_url is None but alternate has text/html link
-    entry = entry_builder(
-        title="Entry with alternate only",
-        canonical_url=None,
-        alternate=[
-            Alternate(href="http://example.com/alternate-page", type="text/html"),
-        ],
-        summary_content=None,
-    )
-    action = add_todoist_task_action_factory()
-    mock_instance = mock_todoist_api.return_value
-    mock_instance.add_task.return_value.id = "task_1"
-    mock_instance.add_task.return_value.content = "Task"
-
-    # act
-    action.process(entry)
-
-    # assert
-    mock_instance.add_task.assert_called_once_with(
-        content="Entry with alternate only - http://example.com/alternate-page",
-        project_id=action.project_id,
-        description=None,
-        priority=None,
-        due_string=None,
-        labels=None,
-    )
 
 
 def test_AddTodoistTaskAction_process_raises_error_when_add_task_fails(
@@ -275,13 +224,11 @@ def test_AddTodoistTaskAction_process_does_not_set_persistent_error_on_500(
     mock_instance.add_task.side_effect = HTTPError(response=response)
 
     # act & assert (first call)
-    # Note: add_task_with_retry will retry 3 times
     with pytest.raises(TodoistApiError) as exc_info:
         action.process(sample_entry)
     assert exc_info.value.details["status_code"] == 500
 
     # act & assert (second call)
-    # Should call the API again (3 more retries)
     with pytest.raises(TodoistApiError) as exc_info_retry:
         action.process(sample_entry)
     assert exc_info_retry.value.details["status_code"] == 500

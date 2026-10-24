@@ -33,7 +33,7 @@ This section describes the project-wide testing conventions, including naming, s
 ### Test naming
 
 - Test function names must read as a natural English sentence.
-- Test names may include the class or function name as written in code (PascalCase for classes like `FeedlyClient`, snake_case for functions like `process_entry`).
+- Test names may include the class or function name as written in code (PascalCase for classes like `MinifluxClient`, snake_case for functions like `process_entry`).
 
 ### Test documentation
 
@@ -53,4 +53,4 @@ This section describes the project-wide testing conventions, including naming, s
 ### Mocking
 
 - Prefer `pytest-mock` via the `mocker` fixture (`MockerFixture`) and create mocks with `mocker.patch`, `mocker.create_autospec`, etc.
-- Fixtures that hold real data (e.g. `Entry`, `Origin`) are test data, not mocks; they may be used as-is.
+- Fixtures that hold real data (e.g. `Entry`, `Feed`) are test data, not mocks; they may be used as-is.

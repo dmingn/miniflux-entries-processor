@@ -6,8 +6,8 @@ Configuration is written in YAML. Each rule has a `name`, a `source`, a `conditi
 
 The `source` controls where entries are fetched from:
 
-- `saved` for saved entries
-- `all` for the All feed (`global.all`)
+- `starred` for starred entries
+- `unread` for unread entries
 
 ### Conditions
 
@@ -18,8 +18,8 @@ Available condition types:
 | Name                | Description                         | Parameters                    |
 | ------------------- | ----------------------------------- | ----------------------------- |
 | `match_all`         | Matches all entries                 | None                          |
-| `regex_partial_match` | Matches when any of the given entry fields (title, author, summary_contents) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"summary_contents"`; `patterns`: list of regex strings |
-| `stream_id_in_list` | Matches entries in given stream IDs | `stream_ids`: list of strings |
+| `regex_partial_match` | Matches when any of the given entry fields (title, author, content) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"content"`; `patterns`: list of regex strings |
+| `feed_id_in_list` | Matches entries whose feed ID is in the given list | `feed_ids`: list of integers |
 
 ### Actions
 
@@ -31,12 +31,12 @@ Available action types:
 | ----------------------- | -------------------------------------------------- | --------------------------------------------------------- |
 | `log`                   | Logs entry details                                 | `level`: `info`, `debug`, `warning`, or `error`           |
 | `add_todoist_task`      | Adds entry as a task in Todoist                    | `project_id` (required), `due_string`, `priority` (1–4), `labels` (list of label names) |
-| `remove_from_feedly_tag` | Removes entry from a Feedly tag (e.g. saved). **There is no undo.** | `tag` (required) |
+| `unstar` | Removes the star from an entry if it is currently starred | None |
 | `run_in_sequence`       | Runs multiple actions in sequence; stops on first failure | `actions`: list of action objects                        |
 
 When using the `add_todoist_task` action, set the `TODOIST_API_TOKEN` environment variable (or add it to a `.env` file).
 
-For `remove_from_feedly_tag`, set `tag` to `"global.saved"` for the built-in saved list, or to a tag label (e.g. `tech`) for user-created tags. The Feedly token directory is read from the `FEEDLY_TOKEN_DIR` environment variable (default: `~/.config/feedly`), as with other Feedly usage.
+Miniflux credentials are read from `MINIFLUX_BASE_URL` and `MINIFLUX_API_KEY`.
 
 ### Schema
 
@@ -50,38 +50,38 @@ miniflux-entries-processor --show-config-schema
 
 ```yaml
 rules:
-  - name: "Log saved entries from specific feed"
+  - name: "Log starred entries from specific feed"
     source:
-      name: "saved"
+      name: "starred"
     condition:
-      name: "stream_id_in_list"
-      stream_ids:
-        - "feed/example.com/123"
+      name: "feed_id_in_list"
+      feed_ids:
+        - 42
     action:
       name: "log"
       level: "info"
 
-  - name: "Add all saved entries to Todoist"
+  - name: "Add all starred entries to Todoist"
     source:
-      name: "saved"
+      name: "starred"
     condition:
       name: "match_all"
     action:
       name: "add_todoist_task"
       project_id: "YOUR_PROJECT_ID"
 
-  - name: "Log entries from All feed"
+  - name: "Log unread entries"
     source:
-      name: "all"
+      name: "unread"
     condition:
       name: "match_all"
     action:
       name: "log"
       level: "info"
 
-  - name: "Add to Todoist then remove from saved"
+  - name: "Add to Todoist then unstar"
     source:
-      name: "saved"
+      name: "starred"
     condition:
       name: "match_all"
     action:
@@ -89,6 +89,5 @@ rules:
       actions:
         - name: "add_todoist_task"
           project_id: "YOUR_PROJECT_ID"
-        - name: "remove_from_feedly_tag"
-          tag: "global.saved"
+        - name: "unstar"
 ```

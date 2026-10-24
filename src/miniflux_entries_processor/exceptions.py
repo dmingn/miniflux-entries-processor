@@ -3,27 +3,27 @@
 from typing import Any
 
 
-class FeedlyEntriesProcessorError(Exception):
+class MinifluxEntriesProcessorError(Exception):
     """Base exception for the application."""
 
 
-class ConfigError(FeedlyEntriesProcessorError):
+class ConfigError(MinifluxEntriesProcessorError):
     """Raised when there is an error loading the configuration."""
 
 
-class FeedlyClientInitError(FeedlyEntriesProcessorError):
-    """Raised when there is an error initializing the Feedly client."""
+class MinifluxClientInitError(MinifluxEntriesProcessorError):
+    """Raised when there is an error initializing the Miniflux client."""
 
 
-class FetchEntriesError(FeedlyEntriesProcessorError):
-    """Raised when there is an error fetching entries from Feedly."""
+class FetchEntriesError(MinifluxEntriesProcessorError):
+    """Raised when there is an error fetching entries from Miniflux."""
 
 
-class ActionSkippedDueToPersistentError(FeedlyEntriesProcessorError):
+class ActionSkippedDueToPersistentError(MinifluxEntriesProcessorError):
     """Raised when an action is skipped because it previously encountered a persistent error."""
 
 
-class TodoistApiError(FeedlyEntriesProcessorError):
+class TodoistApiError(MinifluxEntriesProcessorError):
     """Raised when there is an error communicating with the Todoist API.
 
     Attributes

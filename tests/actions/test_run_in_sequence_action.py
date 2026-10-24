@@ -7,7 +7,8 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from miniflux_entries_processor.actions import LogAction, RunInSequenceAction
-from miniflux_entries_processor.feedly_client import Entry, Origin, Summary
+from miniflux_entries_processor.miniflux_client import Entry
+from tests.helpers import make_entry
 
 
 @pytest.fixture
@@ -15,22 +16,10 @@ def entry_builder() -> Callable[..., Entry]:
     """Fixture for a builder function to create Entry objects."""
 
     def _builder(
-        entry_id: str = "entry_abc",
+        entry_id: int = 1,
         title: str = "Test Entry",
     ) -> Entry:
-        return Entry(
-            id=entry_id,
-            title=title,
-            canonical_url="http://example.com/test",
-            origin=Origin(
-                title="Test Origin",
-                html_url="http://example.com",
-                stream_id="test_stream_id",
-            ),
-            summary=Summary(content="Summary"),
-            published=1234567890,
-            author=None,
-        )
+        return make_entry(entry_id=entry_id, title=title)
 
     return _builder
 
@@ -39,7 +28,7 @@ def test_RunInSequenceAction_process_runs_actions_in_order(
     entry_builder: Callable[..., Entry],
     mocker: MockerFixture,
 ) -> None:
-    # arrange: side_effect records call order (args[0] is self)
+    # arrange
     call_order: list[LogAction] = []
 
     def track(self: LogAction, _entry: Entry) -> None:
@@ -62,7 +51,7 @@ def test_RunInSequenceAction_process_runs_nested_sequence_in_order(
     entry_builder: Callable[..., Entry],
     mocker: MockerFixture,
 ) -> None:
-    # arrange: nested sequence contains action2; outer runs action1, nested, action3
+    # arrange
     call_order: list[LogAction] = []
 
     def track(self: LogAction, _entry: Entry) -> None:
@@ -88,7 +77,7 @@ def test_RunInSequenceAction_process_stops_on_first_failure(
     entry_builder: Callable[..., Entry],
     mocker: MockerFixture,
 ) -> None:
-    # arrange: 1st call returns, 2nd raises, 3rd never reached
+    # arrange
     msg = "intentional failure"
     mock_process = mocker.patch.object(
         LogAction, "process", side_effect=[None, ValueError(msg)]

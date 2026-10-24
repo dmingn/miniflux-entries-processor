@@ -1,8 +1,8 @@
-"""Stream sources for fetching Feedly entries."""
+"""Entry sources for fetching Miniflux entries."""
 
-from miniflux_entries_processor.sources.all_source import AllSource
-from miniflux_entries_processor.sources.saved_source import SavedSource
+from miniflux_entries_processor.sources.starred_source import StarredSource
+from miniflux_entries_processor.sources.unread_source import UnreadSource
 
-__all__ = ["AllSource", "SavedSource", "StreamSource"]
+__all__ = ["Source", "StarredSource", "UnreadSource"]
 
-StreamSource = SavedSource | AllSource
+Source = StarredSource | UnreadSource

@@ -6,7 +6,7 @@ You will:
 
 - check basic requirements
 - install the CLI
-- configure Feedly authentication
+- configure Miniflux authentication
 - create a minimal rule file
 - run the processor against that configuration
 
@@ -17,6 +17,7 @@ For more background, see the main [`README.md`](../../README.md).
 Before you start, ensure that you have:
 
 - Python 3.13+ available in your environment
+- A Miniflux instance and an API key
 
 ### 2. Install the CLI
 
@@ -26,13 +27,16 @@ Install from the repository using `pipx`:
 pipx install git+https://github.com/dmingn/miniflux-entries-processor/
 ```
 
-### 3. Configure Feedly authentication
+### 3. Configure Miniflux authentication
 
-The tool uses the [feedly-client](https://github.com/feedly/python-api-client) `FileAuthStore` format. By default, it reads tokens from `~/.config/feedly`.
+Set the Miniflux base URL and API key via environment variables (or a `.env` file in the current directory):
 
-Place `access.token` and `refresh.token` in that directory. Obtain these tokens via the Feedly Developer Token or OAuth flow (see the Feedly Python API client documentation).
+```bash
+export MINIFLUX_BASE_URL="https://miniflux.example.com"
+export MINIFLUX_API_KEY="your-api-key"
+```
 
-To use a different directory, set the `FEEDLY_TOKEN_DIR` environment variable (or add it to a `.env` file).
+Create an API key in the Miniflux settings UI (Settings → API Keys).
 
 ### 4. Create a minimal rule file
 
@@ -40,19 +44,19 @@ Create a file such as `config.yaml` with the following content:
 
 ```yaml
 rules:
-  - name: "Log saved entries from specific feed"
+  - name: "Log starred entries from specific feed"
     source:
-      name: "saved"
+      name: "starred"
     condition:
-      name: "stream_id_in_list"
-      stream_ids:
-        - "feed/example.com/123"
+      name: "feed_id_in_list"
+      feed_ids:
+        - 42
     action:
       name: "log"
       level: "info"
 ```
 
-This rule logs saved entries from the specified feed at `info` level.
+This rule logs starred entries from the specified feed at `info` level.
 
 For more configuration options (such as Todoist integration), see [`configuration.md`](../reference/configuration.md).
 
@@ -64,4 +68,4 @@ Run the CLI against your configuration file:
 miniflux-entries-processor config.yaml
 ```
 
-If everything is set up correctly, entries from the configured feed will be processed and logged.
+If everything is set up correctly, matching entries will be processed and logged.

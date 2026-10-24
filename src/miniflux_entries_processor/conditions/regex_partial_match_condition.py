@@ -7,9 +7,9 @@ from typing import Literal, assert_never
 from pydantic import Field, field_validator
 
 from miniflux_entries_processor.conditions.base_condition import BaseCondition
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
 
-FieldName = Literal["title", "author", "summary_contents"]
+FieldName = Literal["title", "author", "content"]
 
 
 class RegexPartialMatchCondition(BaseCondition):
@@ -39,8 +39,8 @@ class RegexPartialMatchCondition(BaseCondition):
             return entry.title
         if field_name == "author":
             return entry.author
-        if field_name == "summary_contents":
-            return entry.summary.content if entry.summary else None
+        if field_name == "content":
+            return entry.content
 
         assert_never(field_name)
 

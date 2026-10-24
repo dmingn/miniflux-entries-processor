@@ -1,9 +1,0 @@
-rules:
-  - name: "Log Rule from All feed"
-    source:
-      name: "all"
-    condition:
-      name: "match_all"
-    action:
-      name: "log"
-      level: "info"

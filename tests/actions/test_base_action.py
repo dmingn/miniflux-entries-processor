@@ -5,7 +5,7 @@ from pytest_mock import MockerFixture
 
 from miniflux_entries_processor.actions.base_action import BaseAction
 from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
 
 
 class ConcreteAction(BaseAction):
@@ -22,7 +22,6 @@ def test_BaseAction_process_raises_ActionSkippedDueToPersistentError_when_persis
     action = ConcreteAction()
     mock_entry = mocker.Mock(spec=Entry)
     persistent_error = Exception("Persistent")
-    # Accessing private member for testing purposes
     action._persistent_error = persistent_error  # noqa: SLF001
 
     # act & assert

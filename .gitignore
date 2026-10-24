@@ -205,9 +205,3 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-
-# Serena
-.serena
-
-# Token file for Feedly API
-access.token
