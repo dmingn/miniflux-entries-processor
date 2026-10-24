@@ -3,7 +3,7 @@
 from typing import Literal
 
 from miniflux_entries_processor.conditions.base_condition import BaseCondition
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
 
 
 class MatchAllCondition(BaseCondition):

@@ -11,11 +11,12 @@ from miniflux_entries_processor.actions import (
     AddTodoistTaskAction,
     LogAction,
     RunInSequenceAction,
+    UnstarAction,
 )
 from miniflux_entries_processor.conditions import (
+    FeedIdInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
-    StreamIdInListCondition,
 )
 from miniflux_entries_processor.config_loader import (
     Config,
@@ -25,21 +26,20 @@ from miniflux_entries_processor.config_loader import (
 )
 from miniflux_entries_processor.exceptions import ConfigError
 from miniflux_entries_processor.settings import TodoistSettings
-from miniflux_entries_processor.sources import AllSource, SavedSource
+from miniflux_entries_processor.sources import StarredSource, UnreadSource
 
 TEST_CONFIGS_PATH = Path(__file__).parent / "test_configs"
 _TODOIST_TEST_TOKEN = "todoist_test_token"  # noqa: S105
 
-# Defaults when not varying that dimension (used for round-trip coverage).
-_DEFAULT_SOURCE = AllSource()
+_DEFAULT_SOURCE = UnreadSource()
 _DEFAULT_CONDITION = MatchAllCondition()
 _DEFAULT_ACTION = LogAction()
 
 
-_SOURCES = (AllSource(), SavedSource())
+_SOURCES = (UnreadSource(), StarredSource())
 _CONDITIONS = (
     MatchAllCondition(),
-    StreamIdInListCondition(stream_ids=frozenset({"stream_id"})),
+    FeedIdInListCondition(feed_ids=frozenset({42})),
     RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
 )
 _ACTIONS = (
@@ -53,17 +53,13 @@ _ACTIONS = (
             todoist_api_token=SecretStr(_TODOIST_TEST_TOKEN)
         ),
     ),
+    UnstarAction(),
     RunInSequenceAction(actions=(LogAction(),)),
 )
 
 
 def _save_config(config: Config, file_path: Path) -> None:
-    """Save the configuration to a YAML file.
-
-    Args:
-        config: The Config object to save.
-        file_path: The path to the YAML file where the configuration will be saved.
-    """
+    """Save the configuration to a YAML file."""
     file_path.write_text(to_yaml_str(config), encoding="utf-8")
 
 
@@ -164,22 +160,22 @@ def test_Config_or_operator_merges_rules_and_preserves_operands() -> None:
     # arrange
     rule1 = Rule(
         name="Rule 1",
-        source=SavedSource(),
+        source=StarredSource(),
         condition=MatchAllCondition(name="match_all"),
         action=LogAction(name="log", level="info"),
     )
     rule2 = Rule(
         name="Rule 2",
-        source=SavedSource(),
-        condition=StreamIdInListCondition(
-            name="stream_id_in_list",
-            stream_ids=frozenset({"feed/test.com/1"}),
+        source=StarredSource(),
+        condition=FeedIdInListCondition(
+            name="feed_id_in_list",
+            feed_ids=frozenset({1}),
         ),
         action=LogAction(name="log", level="debug"),
     )
     common_rule = Rule(
         name="Common Rule",
-        source=SavedSource(),
+        source=StarredSource(),
         condition=MatchAllCondition(name="match_all"),
         action=LogAction(name="log", level="warning"),
     )
@@ -205,14 +201,14 @@ def test_Config_or_operator_merges_rules_and_preserves_operands() -> None:
 def test_load_config_merges_yaml_and_yml_from_directory(
     tmp_path: Path,
 ) -> None:
-    # arrange: create a temporary directory structure
+    # arrange
     config_dir = tmp_path / "configs"
     config_dir.mkdir()
 
     yaml_config_path = config_dir / "config1.yaml"
     yaml_rule = Rule(
         name="Yaml Rule",
-        source=SavedSource(),
+        source=StarredSource(),
         condition=MatchAllCondition(name="match_all"),
         action=LogAction(name="log", level="info"),
     )
@@ -221,16 +217,15 @@ def test_load_config_merges_yaml_and_yml_from_directory(
     yml_config_path = config_dir / "config2.yml"
     yml_rule = Rule(
         name="Yml Rule",
-        source=SavedSource(),
-        condition=StreamIdInListCondition(
-            name="stream_id_in_list",
-            stream_ids=frozenset({"feed/test.com/yml"}),
+        source=StarredSource(),
+        condition=FeedIdInListCondition(
+            name="feed_id_in_list",
+            feed_ids=frozenset({99}),
         ),
         action=LogAction(name="log", level="debug"),
     )
     _save_config(Config(rules=frozenset([yml_rule])), yml_config_path)
 
-    # Create an invalid file to ensure it's skipped
     (config_dir / "invalid.txt").write_text("not a yaml", encoding="utf-8")
 
     # act
@@ -243,14 +238,14 @@ def test_load_config_merges_yaml_and_yml_from_directory(
 def test_load_config_merges_rules_from_mixed_file_and_directory_paths(
     tmp_path: Path,
 ) -> None:
-    # arrange: create a temporary directory structure
+    # arrange
     config_dir = tmp_path / "configs"
     config_dir.mkdir()
 
     dir_yaml_path = config_dir / "dir_config.yaml"
     dir_yaml_rule = Rule(
         name="Dir Yaml Rule",
-        source=SavedSource(),
+        source=StarredSource(),
         condition=MatchAllCondition(name="match_all"),
         action=LogAction(name="log", level="info"),
     )
@@ -259,10 +254,10 @@ def test_load_config_merges_rules_from_mixed_file_and_directory_paths(
     standalone_yml_path = tmp_path / "standalone_config.yml"
     standalone_yml_rule = Rule(
         name="Standalone Yml Rule",
-        source=SavedSource(),
-        condition=StreamIdInListCondition(
-            name="stream_id_in_list",
-            stream_ids=frozenset({"feed/standalone.com/yml"}),
+        source=StarredSource(),
+        condition=FeedIdInListCondition(
+            name="feed_id_in_list",
+            feed_ids=frozenset({100}),
         ),
         action=LogAction(name="log", level="debug"),
     )

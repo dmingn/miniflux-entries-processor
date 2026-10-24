@@ -10,20 +10,16 @@ from miniflux_entries_processor.actions import LogAction
 from miniflux_entries_processor.conditions import MatchAllCondition
 from miniflux_entries_processor.config_loader import Rule
 from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
 from miniflux_entries_processor.process import process_entries, process_entry
-from miniflux_entries_processor.sources import SavedSource
+from miniflux_entries_processor.sources import StarredSource
+from tests.helpers import make_entry
 
 
 @pytest.fixture
 def mock_entry() -> Entry:
     """Fixture for a mock Entry."""
-    return Entry(
-        id="entry1",
-        title="Test Entry",
-        canonical_url="http://example.com/entry1",
-        published=1234567890,
-    )
+    return make_entry(entry_id=1, title="Test Entry")
 
 
 @pytest.fixture
@@ -47,7 +43,7 @@ def mock_rule(mock_condition: MatchAllCondition, mock_action: LogAction) -> Rule
     """Fixture for a mock Rule."""
     return Rule(
         name="test-rule",
-        source=SavedSource(),
+        source=StarredSource(),
         condition=mock_condition,
         action=mock_action,
     )

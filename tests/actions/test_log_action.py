@@ -8,7 +8,8 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from miniflux_entries_processor.actions.log_action import LogAction
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
+from tests.helpers import make_entry
 
 
 @pytest.fixture
@@ -18,11 +19,7 @@ def mock_logger(mocker: MockerFixture) -> MagicMock:
 
 @pytest.fixture
 def mock_entry() -> Entry:
-    return Entry(
-        id="entry_id",
-        title="Test Entry Title",
-        canonical_url="http://example.com/entry",
-    )
+    return make_entry(title="Test Entry Title", url="http://example.com/entry")
 
 
 def test_LogAction_can_be_instantiated() -> None:
@@ -65,9 +62,7 @@ def test_LogAction_process_logs_at_configured_level(
     action.process(mock_entry)
 
     # assert
-    log_message = (
-        f"Processing entry: {mock_entry.title} (URL: {mock_entry.canonical_url})"
-    )
+    log_message = f"Processing entry: {mock_entry.title} (URL: {mock_entry.url})"
 
     if expected_log_method == "info":
         mock_logger.info.assert_called_once_with(log_message)

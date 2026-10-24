@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 from miniflux_entries_processor.exceptions import ActionSkippedDueToPersistentError
-from miniflux_entries_processor.feedly_client import Entry
+from miniflux_entries_processor.miniflux_client import Entry
 
 
 class BaseAction(ABC, BaseModel):
@@ -15,7 +15,7 @@ class BaseAction(ABC, BaseModel):
     _persistent_error: Exception | None = PrivateAttr(default=None)
 
     def process(self, entry: Entry) -> None:
-        """Process a single Feedly entry.
+        """Process a single Miniflux entry.
 
         Raises
         ------
@@ -29,4 +29,4 @@ class BaseAction(ABC, BaseModel):
 
     @abstractmethod
     def _process(self, entry: Entry) -> None:
-        """Process a single Feedly entry (implementation)."""
+        """Process a single Miniflux entry (implementation)."""

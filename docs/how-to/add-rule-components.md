@@ -8,9 +8,9 @@ Rules are made of **conditions** (when to match) and **actions** (what to do).
 
 When adding or renaming a condition:
 
-- **Class name**: Describe what is being matched (for example `MatchAllCondition`, `StreamIdInListCondition`). Verb-first is optional but can improve clarity.
-- **File name**: Must match the class name in snake_case only (for example class `MatchAllCondition` → file `match_all_condition.py`, class `StreamIdInListCondition` → file `stream_id_in_list_condition.py`).
-- **Config key `name`**: Must match the class name with the `Condition` suffix removed, in snake_case (for example class `MatchAllCondition` → `name: "match_all"`, class `StreamIdInListCondition` → `name: "stream_id_in_list"`). Changing it is a breaking change.
+- **Class name**: Describe what is being matched (for example `MatchAllCondition`, `FeedIdInListCondition`). Verb-first is optional but can improve clarity.
+- **File name**: Must match the class name in snake_case only (for example class `MatchAllCondition` → file `match_all_condition.py`, class `FeedIdInListCondition` → file `feed_id_in_list_condition.py`).
+- **Config key `name`**: Must match the class name with the `Condition` suffix removed, in snake_case (for example class `MatchAllCondition` → `name: "match_all"`, class `FeedIdInListCondition` → `name: "feed_id_in_list"`). Changing it is a breaking change.
 
 ## Actions
 

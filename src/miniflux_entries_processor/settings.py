@@ -1,8 +1,6 @@
 """Settings loaded from environment variables and optional .env, per secret type."""
 
-from pathlib import Path
-
-from pydantic import Field, SecretStr
+from pydantic import Field, HttpUrl, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _common_config = SettingsConfigDict(
@@ -15,15 +13,18 @@ _common_config = SettingsConfigDict(
 )
 
 
-class FeedlySettings(BaseSettings):
-    """Feedly-related settings (e.g. token directory)."""
+class MinifluxSettings(BaseSettings):
+    """Miniflux-related settings (base URL and API key)."""
 
     model_config = _common_config
 
-    token_dir: Path = Field(
-        default_factory=lambda: Path.home() / ".config" / "feedly",
-        description="Directory where Feedly API token files are stored.",
-        validation_alias="FEEDLY_TOKEN_DIR",
+    base_url: HttpUrl = Field(
+        description="Base URL of the Miniflux instance.",
+        validation_alias="MINIFLUX_BASE_URL",
+    )
+    api_key: SecretStr = Field(
+        description="Miniflux API key.",
+        validation_alias="MINIFLUX_API_KEY",
     )
 
 

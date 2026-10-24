@@ -8,11 +8,11 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "feedly-client>=0.26",
     "logzero>=1.7.0",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "pydantic-yaml>=1.7.0",
+    "requests>=2.32.0",
     "tenacity>=9.1.4",
     "todoist-api-python>=3.1.0",
     "typer>=0.26.8",
@@ -44,10 +44,6 @@ dev = [
 exclude_gitignore = true
 strict = true
 plugins = "pydantic.mypy"
-
-[[tool.mypy.overrides]]
-module = "feedly.*"
-ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "logzero"

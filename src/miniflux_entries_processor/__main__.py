@@ -11,7 +11,7 @@ from logzero import logger
 from miniflux_entries_processor.config_loader import Config, load_config
 from miniflux_entries_processor.exceptions import (
     ConfigError,
-    FeedlyEntriesProcessorError,
+    MinifluxEntriesProcessorError,
 )
 from miniflux_entries_processor.process import process
 
@@ -76,7 +76,7 @@ def main(
 
     try:
         process(config_files=config_files)
-    except FeedlyEntriesProcessorError:
+    except MinifluxEntriesProcessorError:
         logger.exception("An error occurred during Miniflux entries processing.")
         raise typer.Exit(code=1) from None
 

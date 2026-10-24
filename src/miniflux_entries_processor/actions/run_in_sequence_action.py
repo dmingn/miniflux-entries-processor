@@ -10,7 +10,7 @@ from miniflux_entries_processor.actions.base_action import BaseAction
 
 if TYPE_CHECKING:
     from miniflux_entries_processor.actions import Action
-    from miniflux_entries_processor.feedly_client import Entry
+    from miniflux_entries_processor.miniflux_client import Entry
 
 
 class RunInSequenceAction(BaseAction):
@@ -24,6 +24,6 @@ class RunInSequenceAction(BaseAction):
     actions: tuple[Action, ...] = Field(min_length=1)
 
     def _process(self, entry: Entry) -> None:
-        """Process a Feedly entry by running each sub-action in sequence."""
+        """Process a Miniflux entry by running each sub-action in sequence."""
         for action in self.actions:
             action.process(entry)

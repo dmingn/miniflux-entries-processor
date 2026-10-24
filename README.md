@@ -4,7 +4,7 @@ A Python CLI tool that fetches entries from Miniflux and processes them based on
 
 ## Getting started
 
-For installation, Feedly authentication, and your first run of the CLI, see the [getting-started tutorial](docs/tutorials/getting-started.md).
+For installation, Miniflux authentication, and your first run of the CLI, see the [getting-started tutorial](docs/tutorials/getting-started.md).
 
 ## Documentation
 
