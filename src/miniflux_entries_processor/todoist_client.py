@@ -2,8 +2,7 @@
 
 from typing import Any, Literal
 
-from requests import Response
-from requests.exceptions import HTTPError, RequestException
+import httpx
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Task
@@ -13,7 +12,7 @@ from miniflux_entries_processor.exceptions import TodoistApiError
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
-def _response_error_body(response: Response) -> Any:  # noqa: ANN401
+def _response_error_body(response: httpx.Response) -> Any:  # noqa: ANN401
     """Parse JSON body or fall back to raw text."""
     try:
         return response.json()
@@ -22,10 +21,10 @@ def _response_error_body(response: Response) -> Any:  # noqa: ANN401
 
 
 def build_error_details(
-    response: Response | None,
+    response: httpx.Response | None,
     project_id: str,
 ) -> dict[str, Any]:
-    """Build a details dict from a RequestException's response (or None)."""
+    """Build a details dict from an httpx error response (or None)."""
     if response is None:
         return {
             "status_code": "unknown",
@@ -41,12 +40,9 @@ def build_error_details(
 
 def _should_retry(exc: BaseException) -> bool:
     """Return True if the exception is worth retrying (transient/rate limit)."""
-    if isinstance(exc, HTTPError):
-        return (
-            exc.response is not None
-            and exc.response.status_code in RETRYABLE_STATUS_CODES
-        )
-    return isinstance(exc, RequestException)
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code in RETRYABLE_STATUS_CODES
+    return isinstance(exc, httpx.RequestError)
 
 
 def add_task_with_retry(  # noqa: PLR0913
@@ -61,7 +57,7 @@ def add_task_with_retry(  # noqa: PLR0913
 ) -> Task:
     """Call Todoist add_task with retry on transient and rate-limit errors.
 
-    Raises TodoistApiError on RequestException (e.g. HTTPError, ConnectionError).
+    Raises TodoistApiError on httpx.HTTPError (e.g. HTTPStatusError, ConnectError).
     """
     try:
         return _add_task_with_retry_impl(
@@ -73,8 +69,8 @@ def add_task_with_retry(  # noqa: PLR0913
             description=description,
             labels=labels,
         )
-    except RequestException as exc:
-        response = getattr(exc, "response", None)
+    except httpx.HTTPError as exc:
+        response = exc.response if isinstance(exc, httpx.HTTPStatusError) else None
         details = build_error_details(response, project_id)
         message = f"Todoist API request failed with status {details['status_code']}"
         raise TodoistApiError(message, details=details) from exc

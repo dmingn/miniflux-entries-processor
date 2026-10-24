@@ -2,12 +2,12 @@
 
 from unittest.mock import MagicMock
 
+import httpx
 import pytest
-from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from miniflux_entries_processor.exceptions import TodoistApiError
 from miniflux_entries_processor.todoist_client import add_task_with_retry
-from tests.helpers import make_http_error
+from tests.helpers import make_httpx_status_error
 
 
 def test_add_task_with_retry_returns_task_on_success() -> None:
@@ -36,9 +36,9 @@ def test_add_task_with_retry_returns_task_on_success() -> None:
 @pytest.mark.parametrize(
     "retryable_exception",
     [
-        pytest.param(make_http_error(503), id="503"),
+        pytest.param(make_httpx_status_error(503), id="503"),
         pytest.param(
-            RequestsConnectionError("Connection refused"),
+            httpx.ConnectError("Connection refused"),
             id="connection_error",
         ),
     ],
@@ -68,7 +68,7 @@ def test_add_task_with_retry_retries_on_retryable_error_then_succeeds(
 def test_add_task_with_retry_raises_TodoistApiError_after_three_failures() -> None:
     # arrange
     mock_client = MagicMock()
-    mock_client.add_task.side_effect = make_http_error(503)
+    mock_client.add_task.side_effect = make_httpx_status_error(503)
 
     # act & assert
     with pytest.raises(TodoistApiError) as exc_info:
@@ -82,7 +82,7 @@ def test_add_task_with_retry_raises_TodoistApiError_after_three_failures() -> No
 def test_add_task_with_retry_raises_TodoistApiError_on_400() -> None:
     # arrange: 400 is not retried, add_task_with_retry wraps in TodoistApiError
     mock_client = MagicMock()
-    mock_client.add_task.side_effect = make_http_error(400)
+    mock_client.add_task.side_effect = make_httpx_status_error(400)
 
     # act & assert
     with pytest.raises(TodoistApiError) as exc_info:

@@ -7,8 +7,6 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import SecretStr
 from pytest_mock import MockerFixture
-from requests import Response
-from requests.exceptions import HTTPError
 
 from miniflux_entries_processor.actions.add_todoist_task_action import (
     AddTodoistTaskAction,
@@ -19,7 +17,7 @@ from miniflux_entries_processor.exceptions import (
 )
 from miniflux_entries_processor.miniflux_client import Entry
 from miniflux_entries_processor.settings import TodoistSettings
-from tests.helpers import make_entry
+from tests.helpers import make_entry, make_httpx_status_error
 
 
 @pytest.fixture
@@ -192,9 +190,7 @@ def test_AddTodoistTaskAction_process_sets_persistent_error_and_skips_subsequent
     action = add_todoist_task_action_factory()
     mock_instance = mock_todoist_api.return_value
 
-    response = Response()
-    response.status_code = 403
-    mock_instance.add_task.side_effect = HTTPError(response=response)
+    mock_instance.add_task.side_effect = make_httpx_status_error(403)
 
     # act & assert (first call)
     with pytest.raises(TodoistApiError) as exc_info:
@@ -219,9 +215,7 @@ def test_AddTodoistTaskAction_process_does_not_set_persistent_error_on_500(
     action = add_todoist_task_action_factory()
     mock_instance = mock_todoist_api.return_value
 
-    response = Response()
-    response.status_code = 500
-    mock_instance.add_task.side_effect = HTTPError(response=response)
+    mock_instance.add_task.side_effect = make_httpx_status_error(500)
 
     # act & assert (first call)
     with pytest.raises(TodoistApiError) as exc_info:

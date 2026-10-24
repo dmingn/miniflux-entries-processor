@@ -3,17 +3,29 @@
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
+import httpx
 from requests.exceptions import HTTPError
 
 from miniflux_entries_processor.miniflux_client import Category, Entry, Feed
 
 
 def make_http_error(status_code: int) -> HTTPError:
-    """Build an HTTPError with the given status code for retry tests."""
+    """Build a requests HTTPError with the given status code for Miniflux tests."""
     error = HTTPError("Server error")
     error.response = MagicMock()
     error.response.status_code = status_code
     return error
+
+
+def make_httpx_status_error(status_code: int) -> httpx.HTTPStatusError:
+    """Build an httpx HTTPStatusError with the given status code for Todoist tests."""
+    request = httpx.Request("POST", "https://api.todoist.com/api/v1/tasks")
+    response = httpx.Response(status_code, request=request)
+    return httpx.HTTPStatusError(
+        "Server error",
+        request=request,
+        response=response,
+    )
 
 
 def make_entry(  # noqa: PLR0913
