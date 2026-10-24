@@ -1,4 +1,4 @@
-"""Miniflux integration coverage for starring and unstarring via the processor."""
+"""Miniflux integration coverage for processor actions against a live instance."""
 
 from __future__ import annotations
 
@@ -23,6 +23,28 @@ rules:
       name: "match_all"
     action:
       name: "unstar"
+"""
+
+STAR_CONFIG = """
+rules:
+  - name: "Star all unread entries"
+    source:
+      name: "unread"
+    condition:
+      name: "match_all"
+    action:
+      name: "star"
+"""
+
+MARK_AS_READ_CONFIG = """
+rules:
+  - name: "Mark all unread entries as read"
+    source:
+      name: "unread"
+    condition:
+      name: "match_all"
+    action:
+      name: "mark_as_read"
 """
 
 
@@ -57,10 +79,13 @@ def _list_entries(
     api_key: str,
     *,
     starred: bool | None = None,
+    status: str | None = None,
 ) -> list[dict[str, Any]]:
     params: dict[str, str] = {"limit": "100"}
     if starred is not None:
         params["starred"] = str(starred).lower()
+    if status is not None:
+        params["status"] = status
     response = requests.get(
         f"{base_url}/v1/entries",
         headers=_api_headers(api_key),
@@ -82,6 +107,19 @@ def _toggle_bookmark(base_url: str, api_key: str, entry_id: int) -> None:
     response.raise_for_status()
 
 
+def _seed_feed(env: MinifluxIntegrationEnv) -> None:
+    feed_id = _create_feed(env.base_url, env.api_key, env.feed_url)
+    _refresh_feed(env.base_url, env.api_key, feed_id)
+
+
+def _configure_env(
+    env: MinifluxIntegrationEnv,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("MINIFLUX_BASE_URL", env.base_url)
+    monkeypatch.setenv("MINIFLUX_API_KEY", env.api_key)
+
+
 @pytest.mark.miniflux_integration
 def test_process_unstars_starred_entry_from_miniflux(
     miniflux_integration_env: MinifluxIntegrationEnv,
@@ -89,16 +127,7 @@ def test_process_unstars_starred_entry_from_miniflux(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # arrange
-    feed_id = _create_feed(
-        miniflux_integration_env.base_url,
-        miniflux_integration_env.api_key,
-        miniflux_integration_env.feed_url,
-    )
-    _refresh_feed(
-        miniflux_integration_env.base_url,
-        miniflux_integration_env.api_key,
-        feed_id,
-    )
+    _seed_feed(miniflux_integration_env)
 
     entries = _list_entries(
         miniflux_integration_env.base_url,
@@ -122,9 +151,7 @@ def test_process_unstars_starred_entry_from_miniflux(
 
     config_path = tmp_path / "config.yaml"
     config_path.write_text(UNSTAR_CONFIG, encoding="utf-8")
-
-    monkeypatch.setenv("MINIFLUX_BASE_URL", miniflux_integration_env.base_url)
-    monkeypatch.setenv("MINIFLUX_API_KEY", miniflux_integration_env.api_key)
+    _configure_env(miniflux_integration_env, monkeypatch)
 
     # act
     process([config_path])
@@ -136,3 +163,71 @@ def test_process_unstars_starred_entry_from_miniflux(
         starred=True,
     )
     assert all(entry["id"] != entry_id for entry in starred_after)
+
+
+@pytest.mark.miniflux_integration
+def test_process_stars_unread_entry_from_miniflux(
+    miniflux_integration_env: MinifluxIntegrationEnv,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # arrange
+    _seed_feed(miniflux_integration_env)
+
+    unread_before = _list_entries(
+        miniflux_integration_env.base_url,
+        miniflux_integration_env.api_key,
+        status="unread",
+    )
+    assert len(unread_before) >= 1
+    entry_id = unread_before[0]["id"]
+    assert isinstance(entry_id, int)
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(STAR_CONFIG, encoding="utf-8")
+    _configure_env(miniflux_integration_env, monkeypatch)
+
+    # act
+    process([config_path])
+
+    # assert
+    starred_after = _list_entries(
+        miniflux_integration_env.base_url,
+        miniflux_integration_env.api_key,
+        starred=True,
+    )
+    assert any(entry["id"] == entry_id for entry in starred_after)
+
+
+@pytest.mark.miniflux_integration
+def test_process_marks_unread_entry_as_read_from_miniflux(
+    miniflux_integration_env: MinifluxIntegrationEnv,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # arrange
+    _seed_feed(miniflux_integration_env)
+
+    unread_before = _list_entries(
+        miniflux_integration_env.base_url,
+        miniflux_integration_env.api_key,
+        status="unread",
+    )
+    assert len(unread_before) >= 1
+    entry_id = unread_before[0]["id"]
+    assert isinstance(entry_id, int)
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(MARK_AS_READ_CONFIG, encoding="utf-8")
+    _configure_env(miniflux_integration_env, monkeypatch)
+
+    # act
+    process([config_path])
+
+    # assert
+    unread_after = _list_entries(
+        miniflux_integration_env.base_url,
+        miniflux_integration_env.api_key,
+        status="unread",
+    )
+    assert all(entry["id"] != entry_id for entry in unread_after)
