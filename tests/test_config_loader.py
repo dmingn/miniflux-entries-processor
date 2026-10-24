@@ -14,6 +14,7 @@ from miniflux_entries_processor.actions import (
     UnstarAction,
 )
 from miniflux_entries_processor.conditions import (
+    AllOfCondition,
     FeedIdInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
@@ -41,6 +42,12 @@ _CONDITIONS = (
     MatchAllCondition(),
     FeedIdInListCondition(feed_ids=frozenset({42})),
     RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
+    AllOfCondition(
+        conditions=(
+            FeedIdInListCondition(feed_ids=frozenset({42})),
+            MatchAllCondition(),
+        )
+    ),
 )
 _ACTIONS = (
     LogAction(),
