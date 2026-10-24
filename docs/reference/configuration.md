@@ -18,6 +18,8 @@ Available condition types:
 | Name                | Description                         | Parameters                    |
 | ------------------- | ----------------------------------- | ----------------------------- |
 | `match_all`         | Matches all entries                 | None                          |
+| `all_of`            | Matches when every nested condition matches | `conditions`: list of condition objects |
+| `any_of`            | Matches when any nested condition matches | `conditions`: list of condition objects |
 | `regex_partial_match` | Matches when any of the given entry fields (title, author, content) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"content"`; `patterns`: list of regex strings |
 | `feed_id_in_list` | Matches entries whose feed ID is in the given list | `feed_ids`: list of integers |
 
@@ -31,7 +33,9 @@ Available action types:
 | ----------------------- | -------------------------------------------------- | --------------------------------------------------------- |
 | `log`                   | Logs entry details                                 | `level`: `info`, `debug`, `warning`, or `error`           |
 | `add_todoist_task`      | Adds entry as a task in Todoist                    | `project_id` (required), `due_string`, `priority` (1–4), `labels` (list of label names) |
+| `star` | Stars an entry if it is not currently starred | None |
 | `unstar` | Removes the star from an entry if it is currently starred | None |
+| `mark_as_read` | Marks an entry as read | None |
 | `run_in_sequence`       | Runs multiple actions in sequence; stops on first failure | `actions`: list of action objects                        |
 
 When using the `add_todoist_task` action, set the `TODOIST_API_TOKEN` environment variable (or add it to a `.env` file).
@@ -90,4 +94,48 @@ rules:
         - name: "add_todoist_task"
           project_id: "YOUR_PROJECT_ID"
         - name: "unstar"
+
+  - name: "Star and mark matching unread entries as read"
+    source:
+      name: "unread"
+    condition:
+      name: "all_of"
+      conditions:
+        - name: "feed_id_in_list"
+          feed_ids:
+            - 42
+        - name: "regex_partial_match"
+          fields:
+            - "title"
+          patterns:
+            - "interesting"
+    action:
+      name: "run_in_sequence"
+      actions:
+        - name: "star"
+        - name: "mark_as_read"
+
+  - name: "Mark noisy unread entries as read"
+    source:
+      name: "unread"
+    condition:
+      name: "all_of"
+      conditions:
+        - name: "feed_id_in_list"
+          feed_ids:
+            - 42
+        - name: "any_of"
+          conditions:
+            - name: "regex_partial_match"
+              fields:
+                - "title"
+              patterns:
+                - "noise"
+            - name: "regex_partial_match"
+              fields:
+                - "content"
+              patterns:
+                - "reposted"
+    action:
+      name: "mark_as_read"
 ```
