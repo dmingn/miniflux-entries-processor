@@ -13,7 +13,7 @@ services:
       start_period: 5s
 
   rss:
-    image: nginx:1.27-alpine
+    image: nginx:1.29-alpine
     volumes:
       - ./fixtures/feed.xml:/usr/share/nginx/html/feed.xml:ro
     healthcheck:
@@ -28,7 +28,7 @@ services:
       start_period: 2s
 
   miniflux:
-    image: miniflux/miniflux:2.2.14
+    image: miniflux/miniflux:2.3.4
     depends_on:
       db:
         condition: service_healthy
