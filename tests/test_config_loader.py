@@ -15,6 +15,7 @@ from miniflux_entries_processor.actions import (
 )
 from miniflux_entries_processor.conditions import (
     AllOfCondition,
+    AnyOfCondition,
     FeedIdInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
@@ -46,6 +47,12 @@ _CONDITIONS = (
         conditions=(
             FeedIdInListCondition(feed_ids=frozenset({42})),
             MatchAllCondition(),
+        )
+    ),
+    AnyOfCondition(
+        conditions=(
+            FeedIdInListCondition(feed_ids=frozenset({42})),
+            RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
         )
     ),
 )
