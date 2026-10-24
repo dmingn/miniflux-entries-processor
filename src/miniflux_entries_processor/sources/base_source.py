@@ -12,7 +12,7 @@ class BaseSource(ABC, BaseModel):
     """Base class for sources that fetch entries from Miniflux."""
 
     name: str
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     @abstractmethod
     def fetch_entries(self, client: MinifluxClient) -> Iterable[Entry]:

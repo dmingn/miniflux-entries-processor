@@ -289,3 +289,29 @@ def test_load_config_merges_paths_in_argument_order(tmp_path: Path) -> None:
 
     # assert
     assert loaded.rules == (dir_rule, file_rule)
+
+
+def test_load_config_file_rejects_unknown_keys(tmp_path: Path) -> None:
+    # arrange
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """
+rules:
+  - name: typo-rule
+    source:
+      name: unread
+    condition:
+      name: match_all
+    action:
+      name: add_todoist_task
+      project_id: "p"
+      due_strng: today
+""",
+        encoding="utf-8",
+    )
+
+    # act & assert
+    with pytest.raises(ConfigError) as exc_info:
+        load_config_file(path)
+    assert isinstance(exc_info.value.__cause__, ValidationError)
+    assert "due_strng" in str(exc_info.value.__cause__)

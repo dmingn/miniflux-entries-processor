@@ -11,7 +11,7 @@ from miniflux_entries_processor.miniflux_client import Entry
 class BaseAction(ABC, BaseModel):
     """Base class for rule actions."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
     _persistent_error: Exception | None = PrivateAttr(default=None)
 
     def process(self, entry: Entry) -> None:

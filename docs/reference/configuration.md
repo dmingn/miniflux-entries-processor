@@ -2,7 +2,7 @@
 
 This document describes the YAML configuration format for `miniflux-entries-processor`.
 
-Configuration is written in YAML. Each rule has a `name`, a `source`, a `condition` block, and an `action` block. Rules are evaluated in the order they appear after configuration files are merged.
+Configuration is written in YAML. Each rule has a `name`, a `source`, a `condition` block, and an `action` block. Rules are evaluated in the order they appear after configuration files are merged. Unknown keys are rejected.
 
 The `source` controls where entries are fetched from:
 
