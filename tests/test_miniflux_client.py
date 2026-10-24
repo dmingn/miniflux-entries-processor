@@ -255,6 +255,94 @@ def test_MinifluxClient_unstar_entry_skips_toggle_when_already_unstarred(
     assert mock_session.request.call_count == 1
 
 
+def test_MinifluxClient_star_entry_toggles_when_unstarred(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    get_response = MagicMock()
+    get_response.status_code = 200
+    get_response.content = b"{}"
+    get_response.json.return_value = entry_api_dict(entry_id=3, starred=False)
+    get_response.raise_for_status.return_value = None
+
+    toggle_response = MagicMock()
+    toggle_response.status_code = 204
+    toggle_response.content = b""
+    toggle_response.raise_for_status.return_value = None
+    mock_session.request.side_effect = [get_response, toggle_response]
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act
+    changed = client.star_entry(3)
+
+    # assert
+    assert changed is True
+    assert mock_session.request.call_count == 2
+    assert mock_session.request.call_args_list[1].args[0] == "PUT"
+    assert (
+        mock_session.request.call_args_list[1]
+        .args[1]
+        .endswith("/v1/entries/3/bookmark")
+    )
+
+
+def test_MinifluxClient_star_entry_skips_toggle_when_already_starred(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    get_response = MagicMock()
+    get_response.status_code = 200
+    get_response.content = b"{}"
+    get_response.json.return_value = entry_api_dict(entry_id=3, starred=True)
+    get_response.raise_for_status.return_value = None
+    mock_session.request.return_value = get_response
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act
+    changed = client.star_entry(3)
+
+    # assert
+    assert changed is False
+    assert mock_session.request.call_count == 1
+
+
+def test_MinifluxClient_mark_entry_as_read_puts_status_read(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    update_response = MagicMock()
+    update_response.status_code = 204
+    update_response.content = b""
+    update_response.raise_for_status.return_value = None
+    mock_session.request.return_value = update_response
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act
+    client.mark_entry_as_read(3)
+
+    # assert
+    mock_session.request.assert_called_once()
+    update_call = mock_session.request.call_args
+    assert update_call.args[0] == "PUT"
+    assert update_call.args[1].endswith("/v1/entries")
+    assert update_call.kwargs["json"] == {
+        "entry_ids": [3],
+        "status": "read",
+    }
+
+
 def test_MinifluxClient_toggle_entry_bookmark_raises_on_request_error(
     mock_session: MagicMock,
 ) -> None:

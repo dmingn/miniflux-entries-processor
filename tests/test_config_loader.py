@@ -10,10 +10,14 @@ from ruamel.yaml.error import YAMLError
 from miniflux_entries_processor.actions import (
     AddTodoistTaskAction,
     LogAction,
+    MarkAsReadAction,
     RunInSequenceAction,
+    StarAction,
     UnstarAction,
 )
 from miniflux_entries_processor.conditions import (
+    AllOfCondition,
+    AnyOfCondition,
     FeedIdInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
@@ -41,6 +45,18 @@ _CONDITIONS = (
     MatchAllCondition(),
     FeedIdInListCondition(feed_ids=frozenset({42})),
     RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
+    AllOfCondition(
+        conditions=(
+            FeedIdInListCondition(feed_ids=frozenset({42})),
+            MatchAllCondition(),
+        )
+    ),
+    AnyOfCondition(
+        conditions=(
+            FeedIdInListCondition(feed_ids=frozenset({42})),
+            RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
+        )
+    ),
 )
 _ACTIONS = (
     LogAction(),
@@ -54,6 +70,8 @@ _ACTIONS = (
         ),
     ),
     UnstarAction(),
+    StarAction(),
+    MarkAsReadAction(),
     RunInSequenceAction(actions=(LogAction(),)),
 )
 

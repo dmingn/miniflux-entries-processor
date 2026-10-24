@@ -227,6 +227,33 @@ class MinifluxClient:
         self.toggle_entry_bookmark(entry_id)
         return True
 
+    def star_entry(self, entry_id: int) -> bool:
+        """Star an entry if it is not currently starred.
+
+        Returns
+        -------
+        bool
+            True if the bookmark was toggled, False if already starred.
+        """
+        entry = self.get_entry(entry_id)
+        if entry.starred:
+            logger.info(f"Entry {entry_id} is already starred; skipping toggle.")
+            return False
+        self.toggle_entry_bookmark(entry_id)
+        return True
+
+    def mark_entry_as_read(self, entry_id: int) -> None:
+        """Mark an entry as read."""
+        try:
+            self._request(
+                "PUT",
+                "/v1/entries",
+                json={"entry_ids": [entry_id], "status": "read"},
+            )
+        except RequestException as e:
+            msg = f"Failed to mark entry {entry_id} as read."
+            raise MinifluxEntriesProcessorError(msg) from e
+
 
 def create_miniflux_client(settings: MinifluxSettings | None = None) -> MinifluxClient:
     """Create a Miniflux client from settings."""
