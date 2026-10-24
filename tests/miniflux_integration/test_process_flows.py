@@ -52,6 +52,18 @@ def _api_headers(api_key: str) -> dict[str, str]:
     return {"X-Auth-Token": api_key, "Accept": "application/json"}
 
 
+def _list_feeds(base_url: str, api_key: str) -> list[dict[str, Any]]:
+    response = requests.get(
+        f"{base_url}/v1/feeds",
+        headers=_api_headers(api_key),
+        timeout=30,
+    )
+    response.raise_for_status()
+    feeds = response.json()
+    assert isinstance(feeds, list)
+    return feeds
+
+
 def _create_feed(base_url: str, api_key: str, feed_url: str) -> int:
     response = requests.post(
         f"{base_url}/v1/feeds",
@@ -98,6 +110,18 @@ def _list_entries(
     return entries
 
 
+def _get_entry(base_url: str, api_key: str, entry_id: int) -> dict[str, Any]:
+    response = requests.get(
+        f"{base_url}/v1/entries/{entry_id}",
+        headers=_api_headers(api_key),
+        timeout=30,
+    )
+    response.raise_for_status()
+    entry = response.json()
+    assert isinstance(entry, dict)
+    return entry
+
+
 def _toggle_bookmark(base_url: str, api_key: str, entry_id: int) -> None:
     response = requests.put(
         f"{base_url}/v1/entries/{entry_id}/bookmark",
@@ -107,9 +131,48 @@ def _toggle_bookmark(base_url: str, api_key: str, entry_id: int) -> None:
     response.raise_for_status()
 
 
-def _seed_feed(env: MinifluxIntegrationEnv) -> None:
+def _set_entry_status(
+    base_url: str,
+    api_key: str,
+    entry_id: int,
+    status: str,
+) -> None:
+    response = requests.put(
+        f"{base_url}/v1/entries",
+        headers=_api_headers(api_key),
+        json={"entry_ids": [entry_id], "status": status},
+        timeout=30,
+    )
+    response.raise_for_status()
+
+
+def _ensure_starred(
+    base_url: str, api_key: str, entry_id: int, *, starred: bool
+) -> None:
+    entry = _get_entry(base_url, api_key, entry_id)
+    if bool(entry["starred"]) != starred:
+        _toggle_bookmark(base_url, api_key, entry_id)
+
+
+def _ensure_feed(env: MinifluxIntegrationEnv) -> int:
+    for feed in _list_feeds(env.base_url, env.api_key):
+        if feed.get("feed_url") == env.feed_url:
+            feed_id = feed["id"]
+            assert isinstance(feed_id, int)
+            _refresh_feed(env.base_url, env.api_key, feed_id)
+            return feed_id
+
     feed_id = _create_feed(env.base_url, env.api_key, env.feed_url)
     _refresh_feed(env.base_url, env.api_key, feed_id)
+    return feed_id
+
+
+def _first_entry_id(env: MinifluxIntegrationEnv) -> int:
+    entries = _list_entries(env.base_url, env.api_key)
+    assert len(entries) >= 1
+    entry_id = entries[0]["id"]
+    assert isinstance(entry_id, int)
+    return entry_id
 
 
 def _configure_env(
@@ -127,27 +190,14 @@ def test_process_unstars_starred_entry_from_miniflux(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # arrange
-    _seed_feed(miniflux_integration_env)
-
-    entries = _list_entries(
-        miniflux_integration_env.base_url,
-        miniflux_integration_env.api_key,
-    )
-    assert len(entries) >= 1
-    entry_id = entries[0]["id"]
-    assert isinstance(entry_id, int)
-
-    _toggle_bookmark(
+    _ensure_feed(miniflux_integration_env)
+    entry_id = _first_entry_id(miniflux_integration_env)
+    _ensure_starred(
         miniflux_integration_env.base_url,
         miniflux_integration_env.api_key,
         entry_id,
-    )
-    starred_before = _list_entries(
-        miniflux_integration_env.base_url,
-        miniflux_integration_env.api_key,
         starred=True,
     )
-    assert any(entry["id"] == entry_id for entry in starred_before)
 
     config_path = tmp_path / "config.yaml"
     config_path.write_text(UNSTAR_CONFIG, encoding="utf-8")
@@ -172,16 +222,20 @@ def test_process_stars_unread_entry_from_miniflux(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # arrange
-    _seed_feed(miniflux_integration_env)
-
-    unread_before = _list_entries(
+    _ensure_feed(miniflux_integration_env)
+    entry_id = _first_entry_id(miniflux_integration_env)
+    _set_entry_status(
         miniflux_integration_env.base_url,
         miniflux_integration_env.api_key,
-        status="unread",
+        entry_id,
+        "unread",
     )
-    assert len(unread_before) >= 1
-    entry_id = unread_before[0]["id"]
-    assert isinstance(entry_id, int)
+    _ensure_starred(
+        miniflux_integration_env.base_url,
+        miniflux_integration_env.api_key,
+        entry_id,
+        starred=False,
+    )
 
     config_path = tmp_path / "config.yaml"
     config_path.write_text(STAR_CONFIG, encoding="utf-8")
@@ -206,16 +260,14 @@ def test_process_marks_unread_entry_as_read_from_miniflux(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # arrange
-    _seed_feed(miniflux_integration_env)
-
-    unread_before = _list_entries(
+    _ensure_feed(miniflux_integration_env)
+    entry_id = _first_entry_id(miniflux_integration_env)
+    _set_entry_status(
         miniflux_integration_env.base_url,
         miniflux_integration_env.api_key,
-        status="unread",
+        entry_id,
+        "unread",
     )
-    assert len(unread_before) >= 1
-    entry_id = unread_before[0]["id"]
-    assert isinstance(entry_id, int)
 
     config_path = tmp_path / "config.yaml"
     config_path.write_text(MARK_AS_READ_CONFIG, encoding="utf-8")
