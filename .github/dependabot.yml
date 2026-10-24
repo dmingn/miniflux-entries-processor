@@ -22,3 +22,14 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: "docker-compose"
+    directory: "/tests/miniflux_integration"
+    schedule:
+      interval: "weekly"
+    groups:
+      docker-compose-minor-patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
