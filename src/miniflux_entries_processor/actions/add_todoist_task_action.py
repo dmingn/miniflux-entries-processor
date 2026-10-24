@@ -21,7 +21,11 @@ class AddTodoistTaskAction(BaseAction):
     due_string: str | None = None
     priority: Literal[1, 2, 3, 4] | None = None
     labels: frozenset[str] | None = None
-    todoist_settings: TodoistSettings = Field(default_factory=TodoistSettings)
+    # Loaded from the environment / .env only; never part of the YAML rule schema.
+    todoist_settings: TodoistSettings = Field(
+        default_factory=TodoistSettings,
+        exclude=True,
+    )
 
     def _process(self, entry: Entry) -> None:
         """Process a Miniflux entry by adding it as a task to Todoist."""
