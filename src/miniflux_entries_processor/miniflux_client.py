@@ -228,6 +228,21 @@ class MinifluxClient:
         return True
 
 
+    def star_entry(self, entry_id: int) -> bool:
+        """Star an entry if it is not currently starred.
+
+        Returns
+        -------
+        bool
+            True if the bookmark was toggled, False if already starred.
+        """
+        entry = self.get_entry(entry_id)
+        if entry.starred:
+            logger.info(f"Entry {entry_id} is already starred; skipping toggle.")
+            return False
+        self.toggle_entry_bookmark(entry_id)
+        return True
+
 def create_miniflux_client(settings: MinifluxSettings | None = None) -> MinifluxClient:
     """Create a Miniflux client from settings."""
     if settings is None:

@@ -7,15 +7,23 @@ from miniflux_entries_processor.actions.log_action import LogAction
 from miniflux_entries_processor.actions.run_in_sequence_action import (
     RunInSequenceAction,
 )
+from miniflux_entries_processor.actions.star_action import StarAction
 from miniflux_entries_processor.actions.unstar_action import UnstarAction
 
 __all__ = [
     "AddTodoistTaskAction",
     "LogAction",
     "RunInSequenceAction",
+    "StarAction",
     "UnstarAction",
 ]
 
-Action = LogAction | AddTodoistTaskAction | UnstarAction | RunInSequenceAction
+Action = (
+    LogAction
+    | AddTodoistTaskAction
+    | UnstarAction
+    | StarAction
+    | RunInSequenceAction
+)
 
 RunInSequenceAction.model_rebuild()

@@ -11,6 +11,7 @@ from miniflux_entries_processor.actions import (
     AddTodoistTaskAction,
     LogAction,
     RunInSequenceAction,
+    StarAction,
     UnstarAction,
 )
 from miniflux_entries_processor.conditions import (
@@ -68,6 +69,7 @@ _ACTIONS = (
         ),
     ),
     UnstarAction(),
+    StarAction(),
     RunInSequenceAction(actions=(LogAction(),)),
 )
 
