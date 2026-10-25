@@ -47,6 +47,7 @@ class Feed(BaseModel):
     id: int
     title: str
     site_url: str
+    feed_url: str
     category: Category
     model_config = ConfigDict(frozen=True)
 

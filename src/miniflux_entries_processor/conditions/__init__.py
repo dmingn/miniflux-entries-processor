@@ -5,6 +5,9 @@ from miniflux_entries_processor.conditions.any_of_condition import AnyOfConditio
 from miniflux_entries_processor.conditions.feed_id_in_list_condition import (
     FeedIdInListCondition,
 )
+from miniflux_entries_processor.conditions.feed_url_in_list_condition import (
+    FeedUrlInListCondition,
+)
 from miniflux_entries_processor.conditions.match_all_condition import (
     MatchAllCondition,
 )
@@ -16,6 +19,7 @@ __all__ = [
     "AllOfCondition",
     "AnyOfCondition",
     "FeedIdInListCondition",
+    "FeedUrlInListCondition",
     "MatchAllCondition",
     "RegexPartialMatchCondition",
 ]
@@ -23,6 +27,7 @@ __all__ = [
 Condition = (
     MatchAllCondition
     | FeedIdInListCondition
+    | FeedUrlInListCondition
     | RegexPartialMatchCondition
     | AllOfCondition
     | AnyOfCondition

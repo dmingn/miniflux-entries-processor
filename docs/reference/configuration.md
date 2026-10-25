@@ -22,6 +22,7 @@ Available condition types:
 | `any_of`            | Matches when any nested condition matches | `conditions`: list of condition objects |
 | `regex_partial_match` | Matches when any of the given entry fields (title, author, content) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"content"`; `patterns`: list of regex strings |
 | `feed_id_in_list` | Matches entries whose feed ID is in the given list | `feed_ids`: list of integers |
+| `feed_url_in_list` | Matches entries whose feed URL is in the given list | `feed_urls`: list of strings |
 
 ### Actions
 
@@ -58,9 +59,9 @@ rules:
     source:
       name: "starred"
     condition:
-      name: "feed_id_in_list"
-      feed_ids:
-        - 42
+      name: "feed_url_in_list"
+      feed_urls:
+        - "http://example.org/feed.atom"
     action:
       name: "log"
       level: "info"
