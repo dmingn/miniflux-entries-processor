@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic import SecretStr, ValidationError
+from pydantic import ValidationError
 from pydantic_yaml import to_yaml_str
 from ruamel.yaml.error import YAMLError
 
@@ -29,7 +29,6 @@ from miniflux_entries_processor.config_loader import (
     load_config_file,
 )
 from miniflux_entries_processor.exceptions import ConfigError
-from miniflux_entries_processor.settings import TodoistSettings
 from miniflux_entries_processor.sources import StarredSource, UnreadSource
 
 TEST_CONFIGS_PATH = Path(__file__).parent / "test_configs"
@@ -69,9 +68,6 @@ _ACTIONS = (
         due_string="today",
         priority=1,
         labels=frozenset({"reading", "tech"}),
-        todoist_settings=TodoistSettings.model_construct(
-            todoist_api_token=SecretStr(_TODOIST_TEST_TOKEN)
-        ),
     ),
     UnstarAction(),
     StarAction(),
@@ -174,8 +170,8 @@ def test_Config_can_be_written_to_and_loaded_from_yaml(
     # act
     loaded = load_config_file(path)
 
-    # assert
-    assert loaded == config
+    # assert — compare serialized fields only (private runtime attrs are not in YAML)
+    assert loaded.model_dump() == config.model_dump()
 
 
 def test_Config_or_operator_merges_rules_in_order_and_preserves_operands() -> None:
@@ -319,3 +315,36 @@ rules:
         load_config_file(path)
     assert isinstance(exc_info.value.__cause__, ValidationError)
     assert "due_strng" in str(exc_info.value.__cause__)
+
+
+def test_Config_json_schema_excludes_todoist_settings() -> None:
+    schema = Config.model_json_schema()
+    add_todoist_schema = schema["$defs"]["AddTodoistTaskAction"]
+    assert "todoist_settings" not in add_todoist_schema.get("properties", {})
+
+
+def test_load_config_file_rejects_todoist_settings_in_yaml(tmp_path: Path) -> None:
+    # arrange
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """
+rules:
+  - name: secret-in-yaml
+    source:
+      name: unread
+    condition:
+      name: match_all
+    action:
+      name: add_todoist_task
+      project_id: "p"
+      todoist_settings:
+        TODOIST_API_TOKEN: "should-not-be-allowed"
+""",
+        encoding="utf-8",
+    )
+
+    # act & assert
+    with pytest.raises(ConfigError) as exc_info:
+        load_config_file(path)
+    assert isinstance(exc_info.value.__cause__, ValidationError)
+    assert "todoist_settings" in str(exc_info.value.__cause__)
