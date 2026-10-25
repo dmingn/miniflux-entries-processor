@@ -48,9 +48,9 @@ rules:
     source:
       name: "starred"
     condition:
-      name: "feed_id_in_list"
-      feed_ids:
-        - 42
+      name: "feed_url_in_list"
+      feed_urls:
+        - "http://example.org/feed.atom"
     action:
       name: "log"
       level: "info"
