@@ -19,6 +19,7 @@ from miniflux_entries_processor.conditions import (
     AllOfCondition,
     AnyOfCondition,
     FeedIdInListCondition,
+    FeedUrlInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
 )
@@ -44,6 +45,7 @@ _SOURCES = (UnreadSource(), StarredSource())
 _CONDITIONS = (
     MatchAllCondition(),
     FeedIdInListCondition(feed_ids=frozenset({42})),
+    FeedUrlInListCondition(feed_urls=frozenset({"http://example.com/feed.atom"})),
     RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
     AllOfCondition(
         conditions=(

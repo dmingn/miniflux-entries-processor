@@ -39,6 +39,7 @@ def make_entry(  # noqa: PLR0913
     starred: bool = True,
     feed_id: int = 42,
     feed_title: str = "Feed Title",
+    feed_url: str = "http://example.com/feed.atom",
     category_id: int = 7,
     category_title: str = "Category",
 ) -> Entry:
@@ -56,6 +57,7 @@ def make_entry(  # noqa: PLR0913
             id=feed_id,
             title=feed_title,
             site_url="http://example.com",
+            feed_url=feed_url,
             category=Category(id=category_id, title=category_title),
         ),
     )
@@ -85,6 +87,7 @@ def entry_api_dict(  # noqa: PLR0913
             "id": feed_id,
             "title": "Feed Title",
             "site_url": "http://example.com",
+            "feed_url": "http://example.com/feed.atom",
             "category": {"id": 7, "title": "Category"},
         },
     }
