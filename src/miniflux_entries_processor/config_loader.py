@@ -28,14 +28,14 @@ class Rule(BaseModel):
     source: Source = Field(discriminator="name")
     condition: Condition = Field(discriminator="name")
     action: Action = Field(discriminator="name")
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
 class Config(BaseModel):
     """Overall configuration for the Miniflux Entries Processor."""
 
     rules: tuple[Rule, ...] = ()
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     def __or__(self, other: "Config") -> "Config":
         """Combine two Config objects, appending rules in order.

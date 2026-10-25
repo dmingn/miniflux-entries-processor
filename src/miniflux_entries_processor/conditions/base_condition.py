@@ -10,7 +10,7 @@ from miniflux_entries_processor.miniflux_client import Entry
 class BaseCondition(ABC, BaseModel):
     """Base class for rule conditions."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     @abstractmethod
     def matches(self, entry: Entry) -> bool:
