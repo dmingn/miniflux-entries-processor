@@ -23,8 +23,10 @@ from tenacity import (
 
 from miniflux_entries_processor.exceptions import (
     FetchEntriesError,
+    GetEntryError,
+    MarkAsReadError,
     MinifluxClientInitError,
-    MinifluxEntriesProcessorError,
+    ToggleBookmarkError,
 )
 from miniflux_entries_processor.settings import MinifluxSettings
 
@@ -203,7 +205,7 @@ class MinifluxClient:
             return Entry.model_validate(payload)
         except (RequestException, ValidationError) as e:
             msg = f"Failed to fetch entry {entry_id}."
-            raise MinifluxEntriesProcessorError(msg) from e
+            raise GetEntryError(msg) from e
 
     def toggle_entry_bookmark(self, entry_id: int) -> None:
         """Toggle the starred state of an entry (not idempotent)."""
@@ -211,7 +213,7 @@ class MinifluxClient:
             self._request("PUT", f"/v1/entries/{entry_id}/bookmark")
         except RequestException as e:
             msg = f"Failed to toggle bookmark for entry {entry_id}."
-            raise MinifluxEntriesProcessorError(msg) from e
+            raise ToggleBookmarkError(msg) from e
 
     def unstar_entry(self, entry_id: int) -> bool:
         """Remove the star from an entry if it is currently starred.
@@ -253,7 +255,7 @@ class MinifluxClient:
             )
         except RequestException as e:
             msg = f"Failed to mark entry {entry_id} as read."
-            raise MinifluxEntriesProcessorError(msg) from e
+            raise MarkAsReadError(msg) from e
 
 
 def create_miniflux_client(settings: MinifluxSettings | None = None) -> MinifluxClient:

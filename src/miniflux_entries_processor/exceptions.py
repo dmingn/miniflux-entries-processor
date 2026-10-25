@@ -19,6 +19,18 @@ class FetchEntriesError(MinifluxEntriesProcessorError):
     """Raised when there is an error fetching entries from Miniflux."""
 
 
+class GetEntryError(MinifluxEntriesProcessorError):
+    """Raised when there is an error fetching a single entry from Miniflux."""
+
+
+class ToggleBookmarkError(MinifluxEntriesProcessorError):
+    """Raised when there is an error toggling an entry bookmark in Miniflux."""
+
+
+class MarkAsReadError(MinifluxEntriesProcessorError):
+    """Raised when there is an error marking an entry as read in Miniflux."""
+
+
 class ActionSkippedDueToPersistentError(MinifluxEntriesProcessorError):
     """Raised when an action is skipped because it previously encountered a persistent error."""
 

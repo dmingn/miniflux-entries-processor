@@ -9,8 +9,10 @@ from requests.exceptions import HTTPError, RequestException
 
 from miniflux_entries_processor.exceptions import (
     FetchEntriesError,
+    GetEntryError,
+    MarkAsReadError,
     MinifluxClientInitError,
-    MinifluxEntriesProcessorError,
+    ToggleBookmarkError,
 )
 from miniflux_entries_processor.miniflux_client import (
     Entry,
@@ -196,6 +198,22 @@ def test_MinifluxClient_get_entry_returns_entry(mock_session: MagicMock) -> None
     assert isinstance(entry, Entry)
 
 
+def test_MinifluxClient_get_entry_raises_GetEntryError_when_request_raises(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    mock_session.request.side_effect = RequestException("fail")
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act / assert
+    with pytest.raises(GetEntryError):
+        client.get_entry(9)
+
+
 def test_MinifluxClient_unstar_entry_toggles_when_starred(
     mock_session: MagicMock,
 ) -> None:
@@ -343,6 +361,22 @@ def test_MinifluxClient_mark_entry_as_read_puts_status_read(
     }
 
 
+def test_MinifluxClient_mark_entry_as_read_raises_MarkAsReadError_when_request_raises(
+    mock_session: MagicMock,
+) -> None:
+    # arrange
+    mock_session.request.side_effect = RequestException("fail")
+    client = MinifluxClient(
+        base_url="https://miniflux.example",
+        api_key="secret",
+        session=mock_session,
+    )
+
+    # act / assert
+    with pytest.raises(MarkAsReadError):
+        client.mark_entry_as_read(3)
+
+
 def test_MinifluxClient_toggle_entry_bookmark_raises_on_request_error(
     mock_session: MagicMock,
 ) -> None:
@@ -358,7 +392,7 @@ def test_MinifluxClient_toggle_entry_bookmark_raises_on_request_error(
     )
 
     # act / assert
-    with pytest.raises(MinifluxEntriesProcessorError):
+    with pytest.raises(ToggleBookmarkError):
         client.toggle_entry_bookmark(1)
     assert mock_session.request.call_count == 3
 
@@ -378,7 +412,7 @@ def test_MinifluxClient_does_not_retry_on_client_error(
     )
 
     # act / assert
-    with pytest.raises(MinifluxEntriesProcessorError):
+    with pytest.raises(ToggleBookmarkError):
         client.toggle_entry_bookmark(1)
     assert mock_session.request.call_count == 1
 
