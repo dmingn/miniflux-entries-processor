@@ -3,13 +3,16 @@
 from typing import Any, Literal
 
 import httpx
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception
 from todoist_api_python.api import TodoistAPI
 from todoist_api_python.models import Task
 
 from miniflux_entries_processor.exceptions import TodoistApiError
-
-RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+from miniflux_entries_processor.retrying import (
+    RETRY_STOP,
+    RETRY_WAIT,
+    is_retryable_status_code,
+)
 
 
 def _response_error_body(response: httpx.Response) -> Any:  # noqa: ANN401
@@ -41,7 +44,7 @@ def build_error_details(
 def _should_retry(exc: BaseException) -> bool:
     """Return True if the exception is worth retrying (transient/rate limit)."""
     if isinstance(exc, httpx.HTTPStatusError):
-        return exc.response.status_code in RETRYABLE_STATUS_CODES
+        return is_retryable_status_code(exc.response.status_code)
     return isinstance(exc, httpx.RequestError)
 
 
@@ -78,8 +81,8 @@ def add_task_with_retry(  # noqa: PLR0913
 
 @retry(
     reraise=True,
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=1, max=10),
+    stop=RETRY_STOP,
+    wait=RETRY_WAIT,
     retry=retry_if_exception(_should_retry),
 )
 def _add_task_with_retry_impl(  # noqa: PLR0913
