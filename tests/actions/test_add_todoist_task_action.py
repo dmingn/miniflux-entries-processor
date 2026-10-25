@@ -39,15 +39,16 @@ def add_todoist_task_action_factory() -> Callable[..., AddTodoistTaskAction]:
         priority: Literal[1, 2, 3, 4] | None = None,
         labels: frozenset[str] | None = None,
     ) -> AddTodoistTaskAction:
-        return AddTodoistTaskAction(
+        action = AddTodoistTaskAction(
             project_id=project_id,
             due_string=due_string,
             priority=priority,
             labels=labels,
-            todoist_settings=TodoistSettings.model_construct(
-                todoist_api_token=SecretStr("test_token")
-            ),
         )
+        action._todoist_settings = TodoistSettings.model_construct(  # noqa: SLF001
+            todoist_api_token=SecretStr("test_token")
+        )
+        return action
 
     return _factory
 
@@ -132,9 +133,9 @@ def test_AddTodoistTaskAction_process_raises_ValueError_when_todoist_api_token_i
     entry_builder: Callable[..., Entry],
 ) -> None:
     # arrange
-    action = AddTodoistTaskAction(
-        project_id="test_project_id",
-        todoist_settings=TodoistSettings.model_construct(todoist_api_token=None),
+    action = AddTodoistTaskAction(project_id="test_project_id")
+    action._todoist_settings = TodoistSettings.model_construct(  # noqa: SLF001
+        todoist_api_token=None
     )
     entry = entry_builder()
 

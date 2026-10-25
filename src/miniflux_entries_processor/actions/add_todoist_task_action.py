@@ -3,7 +3,7 @@
 from typing import Literal
 
 from logzero import logger
-from pydantic import Field
+from pydantic import PrivateAttr
 from todoist_api_python.api import TodoistAPI
 
 from miniflux_entries_processor.actions.base_action import BaseAction
@@ -21,15 +21,12 @@ class AddTodoistTaskAction(BaseAction):
     due_string: str | None = None
     priority: Literal[1, 2, 3, 4] | None = None
     labels: frozenset[str] | None = None
-    # Loaded from the environment / .env only; never part of the YAML rule schema.
-    todoist_settings: TodoistSettings = Field(
-        default_factory=TodoistSettings,
-        exclude=True,
-    )
+    # Loaded from the environment / .env only; not part of the YAML rule schema.
+    _todoist_settings: TodoistSettings = PrivateAttr(default_factory=TodoistSettings)
 
     def _process(self, entry: Entry) -> None:
         """Process a Miniflux entry by adding it as a task to Todoist."""
-        if self.todoist_settings.todoist_api_token is None:
+        if self._todoist_settings.todoist_api_token is None:
             error_message = "TODOIST_API_TOKEN must be set (e.g. via environment or .env) when using add_todoist_task action"
             raise ValueError(error_message)
 
@@ -39,7 +36,7 @@ class AddTodoistTaskAction(BaseAction):
             )
             raise ValueError(error_message)
 
-        api_token = self.todoist_settings.todoist_api_token.get_secret_value()
+        api_token = self._todoist_settings.todoist_api_token.get_secret_value()
         client = TodoistAPI(api_token)
 
         task_content = f"{entry.title} - {entry.url}"
