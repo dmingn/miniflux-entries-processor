@@ -14,12 +14,7 @@ from pydantic import (
     field_validator,
 )
 from requests.exceptions import HTTPError, RequestException
-from tenacity import (
-    retry,
-    retry_if_exception,
-    stop_after_attempt,
-    wait_exponential,
-)
+from tenacity import retry, retry_if_exception
 
 from miniflux_entries_processor.exceptions import (
     FetchEntriesError,
@@ -28,11 +23,14 @@ from miniflux_entries_processor.exceptions import (
     MinifluxClientInitError,
     ToggleBookmarkError,
 )
+from miniflux_entries_processor.retrying import (
+    RETRY_STOP,
+    RETRY_WAIT,
+    is_retryable_status_code,
+)
 from miniflux_entries_processor.settings import MinifluxSettings
 
 EntryStatus = Literal["unread", "read", "removed"]
-
-RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
 class Category(BaseModel):
@@ -87,9 +85,8 @@ class EntriesResponse(BaseModel):
 def _should_retry(exc: BaseException) -> bool:
     """Return True if the exception is worth retrying (transient/rate limit)."""
     if isinstance(exc, HTTPError):
-        return (
-            exc.response is not None
-            and exc.response.status_code in RETRYABLE_STATUS_CODES
+        return exc.response is not None and is_retryable_status_code(
+            exc.response.status_code
         )
     return isinstance(exc, RequestException)
 
@@ -127,8 +124,8 @@ class MinifluxClient:
 
     @retry(
         reraise=True,
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=1, max=10),
+        stop=RETRY_STOP,
+        wait=RETRY_WAIT,
         retry=retry_if_exception(_should_retry),
     )
     def _request(
