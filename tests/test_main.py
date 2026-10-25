@@ -11,6 +11,7 @@ from miniflux_entries_processor.__main__ import app
 from miniflux_entries_processor.actions import LogAction
 from miniflux_entries_processor.conditions import MatchAllCondition
 from miniflux_entries_processor.config_loader import Config, Rule
+from miniflux_entries_processor.exceptions import ProcessingFailuresError
 from miniflux_entries_processor.sources import StarredSource
 
 runner = CliRunner()
@@ -51,15 +52,13 @@ def test_main_validates_config_and_exits_without_processing(
     mock_process = mocker.patch("miniflux_entries_processor.__main__.process")
     config_file = tmp_path / "config.yml"
     config = Config(
-        rules=frozenset(
-            [
-                Rule(
-                    name="Test Rule",
-                    source=StarredSource(),
-                    condition=MatchAllCondition(),
-                    action=LogAction(),
-                ),
-            ]
+        rules=(
+            Rule(
+                name="Test Rule",
+                source=StarredSource(),
+                condition=MatchAllCondition(),
+                action=LogAction(),
+            ),
         )
     )
     config_file.write_text(to_yaml_str(config), encoding="utf-8")
@@ -101,3 +100,23 @@ def test_main_exits_with_error_for_invalid_config_when_validating(
     # assert
     assert result.exit_code == 1
     mock_process.assert_not_called()
+
+
+def test_main_exits_with_error_when_processing_has_failures(
+    mocker: MockerFixture,
+    tmp_path: Path,
+) -> None:
+    # arrange
+    mock_process = mocker.patch(
+        "miniflux_entries_processor.__main__.process",
+        side_effect=ProcessingFailuresError("Processing completed with 1 failure(s)."),
+    )
+    config_file = tmp_path / "config.yml"
+    config_file.touch()
+
+    # act
+    result = runner.invoke(app, [str(config_file)])
+
+    # assert
+    assert result.exit_code == 1
+    mock_process.assert_called_once_with(config_files=[config_file])

@@ -23,6 +23,10 @@ class ActionSkippedDueToPersistentError(MinifluxEntriesProcessorError):
     """Raised when an action is skipped because it previously encountered a persistent error."""
 
 
+class ProcessingFailuresError(MinifluxEntriesProcessorError):
+    """Raised when one or more entry/rule processing attempts failed."""
+
+
 class TodoistApiError(MinifluxEntriesProcessorError):
     """Raised when there is an error communicating with the Todoist API.
 
