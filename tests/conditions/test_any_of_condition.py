@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from miniflux_entries_processor.conditions import (
     AnyOfCondition,
-    FeedIdInListCondition,
+    FeedUrlInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
 )
@@ -18,11 +18,13 @@ def test_AnyOfCondition_matches_when_any_nested_condition_matches() -> None:
     # arrange
     condition = AnyOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({99})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://other.example.com/feed.atom"})
+            ),
             RegexPartialMatchCondition(fields=("title",), patterns=("Test",)),
         )
     )
-    entry = make_entry(feed_id=42, title="Test Entry")
+    entry = make_entry(feed_url="http://example.com/feed.atom", title="Test Entry")
 
     # act / assert
     assert condition.matches(entry) is True
@@ -32,11 +34,13 @@ def test_AnyOfCondition_does_not_match_when_all_nested_conditions_fail() -> None
     # arrange
     condition = AnyOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({99})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://other.example.com/feed.atom"})
+            ),
             RegexPartialMatchCondition(fields=("title",), patterns=("Missing",)),
         )
     )
-    entry = make_entry(feed_id=42, title="Test Entry")
+    entry = make_entry(feed_url="http://example.com/feed.atom", title="Test Entry")
 
     # act / assert
     assert condition.matches(entry) is False
@@ -46,13 +50,19 @@ def test_AnyOfCondition_supports_nested_any_of() -> None:
     # arrange
     condition = AnyOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({1})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://example.com/other.atom"})
+            ),
             AnyOfCondition(
-                conditions=(FeedIdInListCondition(feed_ids=frozenset({7})),)
+                conditions=(
+                    FeedUrlInListCondition(
+                        feed_urls=frozenset({"http://example.com/nested.atom"})
+                    ),
+                )
             ),
         )
     )
-    entry = make_entry(feed_id=7)
+    entry = make_entry(feed_url="http://example.com/nested.atom")
 
     # act / assert
     assert condition.matches(entry) is True

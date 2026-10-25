@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from miniflux_entries_processor.conditions import (
     AllOfCondition,
-    FeedIdInListCondition,
+    FeedUrlInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
 )
@@ -18,11 +18,13 @@ def test_AllOfCondition_matches_when_all_nested_conditions_match() -> None:
     # arrange
     condition = AllOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({42})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://example.com/feed.atom"})
+            ),
             RegexPartialMatchCondition(fields=("title",), patterns=("Test",)),
         )
     )
-    entry = make_entry(feed_id=42, title="Test Entry")
+    entry = make_entry(feed_url="http://example.com/feed.atom", title="Test Entry")
 
     # act / assert
     assert condition.matches(entry) is True
@@ -32,11 +34,13 @@ def test_AllOfCondition_does_not_match_when_any_nested_condition_fails() -> None
     # arrange
     condition = AllOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({42})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://example.com/feed.atom"})
+            ),
             RegexPartialMatchCondition(fields=("title",), patterns=("Missing",)),
         )
     )
-    entry = make_entry(feed_id=42, title="Test Entry")
+    entry = make_entry(feed_url="http://example.com/feed.atom", title="Test Entry")
 
     # act / assert
     assert condition.matches(entry) is False
@@ -48,11 +52,15 @@ def test_AllOfCondition_supports_nested_all_of() -> None:
         conditions=(
             MatchAllCondition(),
             AllOfCondition(
-                conditions=(FeedIdInListCondition(feed_ids=frozenset({7})),)
+                conditions=(
+                    FeedUrlInListCondition(
+                        feed_urls=frozenset({"http://example.com/nested.atom"})
+                    ),
+                )
             ),
         )
     )
-    entry = make_entry(feed_id=7)
+    entry = make_entry(feed_url="http://example.com/nested.atom")
 
     # act / assert
     assert condition.matches(entry) is True

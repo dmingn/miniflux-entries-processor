@@ -18,7 +18,6 @@ from miniflux_entries_processor.actions import (
 from miniflux_entries_processor.conditions import (
     AllOfCondition,
     AnyOfCondition,
-    FeedIdInListCondition,
     FeedUrlInListCondition,
     MatchAllCondition,
     RegexPartialMatchCondition,
@@ -44,18 +43,21 @@ _DEFAULT_ACTION = LogAction()
 _SOURCES = (UnreadSource(), StarredSource())
 _CONDITIONS = (
     MatchAllCondition(),
-    FeedIdInListCondition(feed_ids=frozenset({42})),
     FeedUrlInListCondition(feed_urls=frozenset({"http://example.com/feed.atom"})),
     RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
     AllOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({42})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://example.com/feed.atom"})
+            ),
             MatchAllCondition(),
         )
     ),
     AnyOfCondition(
         conditions=(
-            FeedIdInListCondition(feed_ids=frozenset({42})),
+            FeedUrlInListCondition(
+                feed_urls=frozenset({"http://example.com/feed.atom"})
+            ),
             RegexPartialMatchCondition(fields=("title",), patterns=("pattern",)),
         )
     ),
@@ -187,9 +189,9 @@ def test_Config_or_operator_merges_rules_in_order_and_preserves_operands() -> No
     rule2 = Rule(
         name="Rule 2",
         source=StarredSource(),
-        condition=FeedIdInListCondition(
-            name="feed_id_in_list",
-            feed_ids=frozenset({1}),
+        condition=FeedUrlInListCondition(
+            name="feed_url_in_list",
+            feed_urls=frozenset({"http://example.com/feed.atom"}),
         ),
         action=LogAction(name="log", level="debug"),
     )
