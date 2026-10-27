@@ -20,7 +20,7 @@ Available condition types:
 | `match_all`         | Matches all entries                 | None                          |
 | `all_of`            | Matches when every nested condition matches | `conditions`: list of condition objects |
 | `any_of`            | Matches when any nested condition matches | `conditions`: list of condition objects |
-| `regex_partial_match` | Matches when any of the given entry fields (title, author, content) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"content"`; `patterns`: list of regex strings |
+| `regex_partial_match` | Matches when any of the given entry fields (title, author, content, url) contains text matching any of the patterns | `fields`: list of `"title"`, `"author"`, `"content"`, `"url"`; `patterns`: list of regex strings |
 | `feed_url_in_list` | Matches entries whose feed URL is in the given list | `feed_urls`: list of strings |
 
 ### Actions

@@ -46,6 +46,15 @@ if TYPE_CHECKING:
             id="match_content",
         ),
         pytest.param(
+            make_entry(
+                title="Hello World", author="Alice", url="http://example.com/article"
+            ),
+            ["url"],
+            ["example\\.com"],
+            True,
+            id="match_url",
+        ),
+        pytest.param(
             make_entry(title="Hello World", author="Alice"),
             ["title", "author"],
             ["Alice"],
