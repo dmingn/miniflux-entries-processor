@@ -28,7 +28,7 @@ services:
       start_period: 2s
 
   miniflux:
-    image: miniflux/miniflux:2.3.4
+    image: miniflux/miniflux:2.3.5
     depends_on:
       db:
         condition: service_healthy
